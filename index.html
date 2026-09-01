@@ -2,11 +2,6 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta property="og:title" content="DEFLECTOR — 반사 아레나">
-<meta property="og:description" content="공격 버튼 없이, 날아오는 탄환을 정확한 순간에 되받아치는 것만이 유일한 무기인 반사 로그라이트.">
-<meta property="og:url" content="https://hadangs516.github.io/deflector/">
-<link rel="icon" type="image/png" href="favicon.png">
-<meta property="og:image" content="https://hadangs516.github.io/deflector/og-image.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>DEFLECTOR — 반사 아레나</title>
 <style>
@@ -82,14 +77,14 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
   <div class="ov on" id="ovTitle">
     <div class="eyebrow">Reflect · Overload · Survive</div>
     <div class="title">DEFLECTOR</div>
-    <div class="tagline">적의 탄환은 피하는 게 아니라 <b>되돌려주는</b> 것.<br>방벽을 정확한 순간에 펼치면 시간이 멎고, 그 탄은 당신의 무기가 됩니다.</div>
+    <div class="tagline">적의 탄환은 피하는 게 아니라 <b>되돌려주는</b> 것.<br>배리어를 정확한 순간에 펼치면 시간이 멎고, 그 탄은 당신의 무기가 됩니다.</div>
     <div class="keys">
       <div class="krow"><span>WASD</span><span>이동</span></div>
       <div class="krow"><span>MOUSE</span><span>조준</span></div>
       <div class="krow"><span>L-CLICK</span><span>사격 (홀드)</span></div>
-      <div class="krow"><span>R-CLICK / SPACE</span><span>반사 방벽</span></div>
+      <div class="krow"><span>R-CLICK / SPACE</span><span>반사 배리어</span></div>
       <div class="krow"><span>SHIFT</span><span>대시 (무적)</span></div>
-      <div class="krow"><span>Q</span><span>오버드라이브</span></div>
+      <div class="krow"><span>Q</span><span>궁극기</span></div>
       <div class="krow"><span>ESC</span><span>일시정지</span></div>
       <div class="krow"><span>M</span><span>음소거</span></div>
     </div>
@@ -431,7 +426,7 @@ function tryOverdrive() {
   P.od = 0; P.odT = 5.0;
   ring(P.x, P.y, 10, 320, '255,205,90', 0.7, 5);
   flash(0.5, '255,205,90'); shake(14); SFX.od();
-  addText(P.x, P.y - 40, 'OVERDRIVE', '255,205,90', 30, 1.2);
+  addText(P.x, P.y - 40, '궁극기', '255,205,90', 30, 1.2);
   A.intensity = 3;
 }
 function hurtPlayer(n, srcx, srcy) {
@@ -477,7 +472,7 @@ function updatePlayer(dt) {
   P.shieldT = Math.max(0, P.shieldT - dt);
   P.shieldCD = Math.max(0, P.shieldCD - dt);
   P.fireCD -= dt;
-  if (P.odT > 0) { P.odT -= dt; if (P.odT <= 0) { A.intensity = G.wave >= 4 ? 2 : 1; addText(P.x, P.y - 36, 'OVERDRIVE END', '150,190,220', 15, 0.9); } }
+  if (P.odT > 0) { P.odT -= dt; if (P.odT <= 0) { A.intensity = G.wave >= 4 ? 2 : 1; addText(P.x, P.y - 36, '궁극기 종료', '150,190,220', 15, 0.9); } }
 
   if (mouse.fire && P.fireCD <= 0) {
     P.fireCD = P.fireRate * (P.odT > 0 ? 0.45 : 1);
@@ -785,7 +780,7 @@ function startWave(n) {
   }
   SFX.wave();
   if (n === 2) addText(W / 2, H / 2 + 62, '적탄은 우클릭 / SPACE 로 되받아치세요', '150,255,180', 20, 3.4);
-  if (n === 3) addText(W / 2, H / 2 + 62, '방벽을 켠 직후 0.15초가 PERFECT 판정', '255,205,90', 20, 3.4);
+  if (n === 3) addText(W / 2, H / 2 + 62, '배리어를 켠 직후 0.15초가 PERFECT 판정', '255,205,90', 20, 3.4);
   let budget = 6 + n * 3.4;
   const pool = [];
   pool.push('drone', 'drone');
@@ -810,7 +805,7 @@ function waveClear() {
   G.score += bonus;
   addText(W / 2, H / 2 - 30, 'WAVE CLEAR  +' + bonus, '150,255,180', 26, 1.6);
   flash(0.22, '150,255,200');
-  if (P.regen && P.hp < P.maxhp) { P.hp++; addText(P.x, P.y - 40, '+1 CORE', '150,255,180', 17, 1.1); }
+  if (P.regen && P.hp < P.maxhp) { P.hp++; addText(P.x, P.y - 40, '+1 체력', '150,255,180', 17, 1.1); }
   if (G.wave % 2 === 0) { G.breakT = 1.0; G.pendingUp = true; }
   else G.breakT = 2.2;
 }
@@ -822,14 +817,14 @@ const CARDS = [
   { id: 'pierce', n: '관통 코어', d: '탄환 관통 +1', s: '⟶', c: '#5ce1ff', max: 3, f: () => P.pierce++ },
   { id: 'dmg', n: '중구경탄', d: '탄환 피해 +28%, 연사 -7%', s: '◈', c: '#5ce1ff', max: 5, f: () => { P.dmg *= 1.28; P.fireRate *= 1.07; } },
   { id: 'refl', n: '증폭 반사', d: '반사탄 피해 +55%', s: '⇄', c: '#ffd469', max: 5, f: () => P.deflectMul *= 1.55 },
-  { id: 'arc', n: '광역 방벽', d: '방벽 각도 +26%, 지속 +18%', s: '◡', c: '#ffd469', max: 4, f: () => { P.arc = Math.min(4.4, P.arc * 1.26); P.shieldDur *= 1.18; } },
+  { id: 'arc', n: '광역 배리어', d: '배리어 각도 +26%, 지속 +18%', s: '◡', c: '#ffd469', max: 4, f: () => { P.arc = Math.min(4.4, P.arc * 1.26); P.shieldDur *= 1.18; } },
   { id: 'perf', n: '정밀 타이밍', d: '퍼펙트 판정 +55%', s: '◎', c: '#ffd469', max: 4, f: () => P.perfectWin *= 1.55 },
-  { id: 'cool', n: '방벽 냉각', d: '방벽 재사용 대기 -30%', s: '↻', c: '#ffd469', max: 3, f: () => P.shieldCDMax *= 0.70 },
+  { id: 'cool', n: '배리어 냉각', d: '배리어 쿨타임 -30%', s: '↻', c: '#ffd469', max: 3, f: () => P.shieldCDMax *= 0.70 },
   { id: 'slow', n: '시간 왜곡', d: '퍼펙트 슬로우 지속 +100%', s: '◷', c: '#ffd469', max: 3, f: () => P.slowLen *= 2 },
-  { id: 'dash', n: '추진기 개조', d: '대시 재사용 대기 -32%', s: '»', c: '#a78bfa', max: 3, f: () => P.dashCDMax *= 0.68 },
-  { id: 'core', n: '예비 코어', d: '최대 코어 +1, 즉시 회복', s: '❖', c: '#7dffb0', max: 4, f: () => { P.maxhp++; P.hp++; } },
-  { id: 'regen', n: '나노 수복', d: '웨이브 클리어 시 코어 +1', s: '✚', c: '#7dffb0', max: 1, f: () => P.regen = true },
-  { id: 'od', n: '과부하 회로', d: '오버드라이브 충전 +45%', s: '⚡', c: '#ff8ad4', max: 4, f: () => P.odGain *= 1.45 },
+  { id: 'dash', n: '추진기 개조', d: '대시 쿨타임 -32%', s: '»', c: '#a78bfa', max: 3, f: () => P.dashCDMax *= 0.68 },
+  { id: 'core', n: '예비 체력', d: '최대 체력 +1, 즉시 회복', s: '❖', c: '#7dffb0', max: 4, f: () => { P.maxhp++; P.hp++; } },
+  { id: 'regen', n: '나노 수복', d: '웨이브 클리어 시 체력 +1', s: '✚', c: '#7dffb0', max: 1, f: () => P.regen = true },
+  { id: 'od', n: '과부하 회로', d: '궁극기 충전 +45%', s: '⚡', c: '#ff8ad4', max: 4, f: () => P.odGain *= 1.45 },
   { id: 'boom', n: '파열탄', d: '적 처치 시 소형 폭발', s: '✸', c: '#ff8ad4', max: 1, f: () => P.explosive = true },
   { id: 'chain', n: '연쇄 반응', d: '콤보 피해 보너스 2배', s: '∞', c: '#ff8ad4', max: 3, f: () => P.comboDmg *= 2 },
   { id: 'hold', n: '냉철함', d: '콤보 유지 시간 +60%', s: '⌛', c: '#ff8ad4', max: 3, f: () => P.comboLen *= 1.6 }
@@ -1247,7 +1242,7 @@ function drawHUD() {
   // cores
   ctx.textAlign = 'left';
   ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
-  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.fillText('CORE', PAD + 4, PAD + 20);
+  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.fillText('체력', PAD + 4, PAD + 20);
   for (let i = 0; i < P.maxhp; i++) {
     const x = PAD + 6 + i * 22, y = PAD + 36, on = i < P.hp;
     ctx.save(); ctx.translate(x + 7, y); ctx.rotate(Math.PI / 4);
@@ -1260,7 +1255,7 @@ function drawHUD() {
   // overdrive
   const odw = 190;
   ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
-  ctx.fillText('OVERDRIVE', PAD + 4, H - PAD - 30);
+  ctx.fillText('궁극기', PAD + 4, H - PAD - 30);
   if (P.odT > 0) bar(PAD + 4, H - PAD - 24, odw, 9, P.odT / 5, '#ffe08a', '#ff8a3d');
   else bar(PAD + 4, H - PAD - 24, odw, 9, P.od / 100, '#3fa8ff', '#7ff0ff');
   if (P.od >= 100 && P.odT <= 0) {
