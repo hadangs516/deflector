@@ -2,23 +2,23 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta property="og:title" content="DEFLECTOR — 반사 아레나">
-<meta property="og:description" content="공격 버튼 없이, 날아오는 탄환을 정확한 순간에 되받아치는 것만이 유일한 무기인 반사 로그라이트.">
-<meta property="og:url" content="https://hadangs516.github.io/deflector/">
-<link rel="icon" type="image/png" href="favicon.png">
-<meta property="og:image" content="https://hadangs516.github.io/deflector/og-image.png">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DEFLECTOR — 반사 아레나</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#04050a;overflow:hidden;color:#e6f0fb;
+:root{--vh100:100vh}
+@supports (height:100dvh){:root{--vh100:100dvh}}
+html,body{height:var(--vh100);background:#04050a;overflow:hidden;color:#e6f0fb;
   font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
 .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
 
 #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 50% 40%,#0a0f1c 0%,#04050a 70%)}
-#stage{position:relative;width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100vw*9/16));
+#stage{position:relative;width:min(100vw,calc(var(--vh100)*16/9));height:min(var(--vh100),calc(100vw*9/16));
   box-shadow:0 0 90px rgba(40,200,255,.10),0 0 0 1px rgba(90,200,255,.14)}
 canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 
@@ -72,6 +72,50 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
   transition:opacity .3s ease;pointer-events:none}
 #toast.on{opacity:1}
 .note{margin-top:18px;font-size:10px;letter-spacing:.16em;color:#4d6480}
+
+.modeRow{display:flex;gap:clamp(12px,2vw,26px);margin-top:32px;flex-wrap:wrap;justify-content:center}
+.modeCard{width:clamp(158px,20vw,236px);padding:clamp(18px,2.4vw,30px) clamp(12px,1.6vw,20px);
+  background:linear-gradient(170deg,#0b1424,#070b14);border:1px solid rgba(120,190,240,.22);cursor:pointer;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
+.modeCard:hover{transform:translateY(-6px);border-color:#5ce1ff;box-shadow:0 12px 40px -10px #5ce1ff}
+.modeCard .ic{font-size:clamp(28px,3.8vw,44px);color:#5ce1ff;line-height:1}
+.modeCard .t{margin-top:12px;font-size:clamp(14px,1.7vw,20px);font-weight:800;color:#eaf4ff}
+.modeCard .s{margin-top:7px;font-size:clamp(10px,1.15vw,13px);color:#8ba4bf;line-height:1.6}
+
+.setBox{margin-top:20px;width:min(430px,88vw)}
+.setRow{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+  padding:11px 14px;margin-top:8px;border:1px solid rgba(120,190,240,.18);background:rgba(20,40,64,.35)}
+.setRow .lb{font-size:clamp(11px,1.3vw,14px);color:#cfe3f6;text-align:left;line-height:1.4}
+.setRow .lb small{display:block;color:#7c93ad;font-size:10px;margin-top:4px;letter-spacing:0}
+.sw{flex:0 0 auto;width:50px;height:27px;border-radius:14px;border:1px solid rgba(120,190,240,.35);
+  background:rgba(10,20,34,.9);position:relative;cursor:pointer;transition:background .15s,border-color .15s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;
+  background:#516b85;transition:left .15s,background .15s}
+.sw.on{background:rgba(40,150,200,.35);border-color:#5ce1ff}
+.sw.on:after{left:26px;background:#7ff0ff}
+.miniBtn{flex:0 0 auto;padding:8px 15px;font-size:11px;letter-spacing:.1em;color:#7fd8ff;
+  background:none;border:1px solid rgba(120,210,255,.45);cursor:pointer}
+.miniBtn:hover{background:rgba(60,180,255,.12)}
+
+#ovTut{justify-content:flex-start;background:rgba(3,5,11,.55)}
+.tutPanel{margin-top:6vh;max-width:min(560px,88vw);padding:clamp(14px,2vw,22px);
+  background:rgba(7,13,24,.95);border:1px solid rgba(120,190,240,.28)}
+.tutStep{font-size:10px;letter-spacing:.28em;color:#5ce1ff}
+.tutTitle{margin-top:8px;font-size:clamp(17px,2.4vw,26px);font-weight:800;color:#eaf4ff}
+.tutBody{margin-top:10px;font-size:clamp(11px,1.35vw,15px);color:#9db4cd;line-height:1.75}
+.tutBtns{margin-top:16px;display:flex;gap:10px;justify-content:center}
+.tutBtns .btn{margin-top:0}
+#tutSkip{position:absolute;top:14px;right:16px;padding:9px 18px;font-size:11px;letter-spacing:.18em;
+  color:#9db4cd;background:rgba(8,14,26,.9);border:1px solid rgba(120,190,240,.3);cursor:pointer}
+#tutSkip:hover{color:#fff;border-color:#7fd8ff}
+#tutMark{position:absolute;border:2px solid #ffd469;border-radius:50%;pointer-events:none;
+  box-shadow:0 0 24px rgba(255,212,105,.6);display:none}
+#tutMark.on{display:block;animation:tutPulse 1.15s ease-in-out infinite}
+@keyframes tutPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.95}
+  50%{transform:translate(-50%,-50%) scale(1.18);opacity:.4}}
+#btnModeChange{position:absolute;top:12px;right:14px;padding:8px 15px;font-size:10px;letter-spacing:.16em;
+  color:#7c93ad;background:rgba(8,14,26,.8);border:1px solid rgba(120,190,240,.22);cursor:pointer;z-index:5}
+#btnModeChange:hover{color:#7fd8ff;border-color:#7fd8ff}
 @media (max-width:620px){.keys{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -79,11 +123,30 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 <div id="wrap"><div id="stage">
   <canvas id="cv"></canvas>
 
-  <div class="ov on" id="ovTitle">
+  <div class="ov on" id="ovMode">
+    <div class="eyebrow">Select Control Scheme</div>
+    <div class="title">DEFLECTOR</div>
+    <div class="tagline">어떤 방식으로 플레이하시겠어요?<br>나중에 타이틀 화면에서 언제든 바꿀 수 있습니다.</div>
+    <div class="modeRow">
+      <div class="modeCard" id="btnPickPC">
+        <div class="ic">⌨</div>
+        <div class="t">PC로 플레이</div>
+        <div class="s">키보드와 마우스로 조작합니다.</div>
+      </div>
+      <div class="modeCard" id="btnPickMobile">
+        <div class="ic">☰</div>
+        <div class="t">모바일로 플레이</div>
+        <div class="s">화면 터치 조이스틱으로 조작합니다. 튜토리얼이 함께 제공됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ov" id="ovTitle">
+    <button id="btnModeChange">모드 변경</button>
     <div class="eyebrow">Reflect · Overload · Survive</div>
     <div class="title">DEFLECTOR</div>
     <div class="tagline">적의 탄환은 피하는 게 아니라 <b>되돌려주는</b> 것.<br>배리어를 정확한 순간에 펼치면 시간이 멎고, 그 탄은 당신의 무기가 됩니다.</div>
-    <div class="keys">
+    <div class="keys" id="keysBox">
       <div class="krow"><span>WASD</span><span>이동</span></div>
       <div class="krow"><span>MOUSE</span><span>조준</span></div>
       <div class="krow"><span>L-CLICK</span><span>사격 (홀드)</span></div>
@@ -94,7 +157,8 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
       <div class="krow"><span>M</span><span>음소거</span></div>
     </div>
     <button class="btn" id="btnStart">시작하기</button>
-    <div class="note">최고 기록 <span class="mono" id="bestTitle">0</span> · 키보드와 마우스가 필요합니다</div>
+    <div class="note">최고 기록 <span class="mono" id="bestTitle">0</span><span id="noteTail"> · 키보드와 마우스가 필요합니다</span></div>
+    <div class="note" id="iosHint" style="display:none">아이폰에서 주소창까지 완전히 없애려면, 공유 버튼 → "홈 화면에 추가" 후 아이콘으로 실행하세요</div>
   </div>
 
   <div class="ov" id="ovUp">
@@ -106,8 +170,32 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
   <div class="ov" id="ovPause">
     <div class="eyebrow">Paused</div>
     <div class="hd">일시정지</div>
+    <div class="setBox">
+      <div class="setRow"><div class="lb">소리<small>효과음과 배경음악을 함께 켜고 끕니다</small></div>
+        <div class="sw on" id="swSound"></div></div>
+      <div class="setRow mob"><div class="lb">대시를 이동 스틱에 합치기<small>끄면 오른쪽에 대시 버튼이 생깁니다</small></div>
+        <div class="sw on" id="swDash"></div></div>
+      <div class="setRow mob"><div class="lb">배리어를 조준 스틱에 합치기<small>끄면 오른쪽에 배리어 버튼이 생깁니다</small></div>
+        <div class="sw on" id="swBarrier"></div></div>
+      <div class="setRow mob"><div class="lb">튜토리얼<small>조작법을 처음부터 다시 봅니다</small></div>
+        <button class="miniBtn" id="btnTutAgain">다시 보기</button></div>
+    </div>
     <button class="btn" id="btnResume">계속하기</button>
     <button class="btn ghost" id="btnQuit">포기하고 처음으로</button>
+  </div>
+
+  <div class="ov" id="ovTut">
+    <button id="tutSkip">건너뛰기</button>
+    <div class="tutPanel">
+      <div class="tutStep" id="tutStep">STEP 1 / 5</div>
+      <div class="tutTitle" id="tutTitle"></div>
+      <div class="tutBody" id="tutBody"></div>
+      <div class="tutBtns">
+        <button class="btn ghost" id="tutPrev">이전</button>
+        <button class="btn" id="tutNext">다음</button>
+      </div>
+    </div>
+    <div id="tutMark"></div>
   </div>
 
   <div class="ov" id="ovOver">
@@ -308,14 +396,87 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { const k = e.key.toLowerCase(); keys[k] = false; if (k === ' ') mouse.deflect = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouse.fire = mouse.deflect = false; });
 function toPt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
-cv.addEventListener('pointermove', e => { const p = toPt(e); mouse.x = p.x; mouse.y = p.y; });
-cv.addEventListener('pointerdown', e => {
-  cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
-  const p = toPt(e); mouse.x = p.x; mouse.y = p.y;
-  if (e.button === 2) mouse.deflect = true; else mouse.fire = true;
+
+// ---------- mobile control layout (logical 1280x720 coords) ----------
+let MODE = null;
+const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true };
+const MOVE_R = 92, AIM_R = 84, BTN_R = 38, ULT_R = 46, PAUSE_R = 28;
+const MOVE_HOME = { x: 224, y: H - 168 };
+const AIM_C = { x: W - 172, y: H - 158 };
+const ULT_C = { x: W - 322, y: H - 104 };
+const BAR_C = { x: W - 312, y: H - 232 };
+const DASH_C = { x: W - 202, y: H - 310 };
+const PAUSE_C = { x: 64, y: 58 };
+const BARRIER_TRIG = 0.90, FLICK_RATE = 2.2;
+
+function mkStick(hx, hy) {
+  return { id: -1, on: false, ox: hx, oy: hy, dx: 1, dy: 0, mag: 0, pmag: 0, ang: 0, lastAng: 0, armed: false };
+}
+const TC = { move: mkStick(MOVE_HOME.x, MOVE_HOME.y), aim: mkStick(AIM_C.x, AIM_C.y) };
+function resetTouch() {
+  for (const k of ['move', 'aim']) { const s = TC[k]; s.id = -1; s.on = false; s.mag = 0; s.pmag = 0; s.armed = true; }
+  TC.move.ox = MOVE_HOME.x; TC.move.oy = MOVE_HOME.y;
+  mouse.fire = false; mouse.deflect = false;
+}
+function hitC(p, c, r) { return (p.x - c.x) ** 2 + (p.y - c.y) ** 2 <= r * r; }
+function setStick(s, p, R) {
+  const dx = p.x - s.ox, dy = p.y - s.oy, d = Math.hypot(dx, dy);
+  s.mag = clamp(d / R, 0, 1);
+  if (d > 0.5) { s.ang = Math.atan2(dy, dx); s.dx = dx / d; s.dy = dy / d; }
+}
+// true once when the stick is pushed outward past the threshold FAST enough.
+// Rate-based so it works whether the stick was centered or already half-pushed.
+function stickFlick(s, rdt) {
+  const rise = (s.mag - s.pmag) / Math.max(rdt, 1 / 240);
+  s.pmag = s.mag;
+  if (s.mag < BARRIER_TRIG) { s.armed = true; return false; }
+  if (s.armed) { s.armed = false; return rise >= FLICK_RATE; }
+  return false;
+}
+function moveAng() { return (TC.move.on && TC.move.mag > 0.14) ? TC.move.ang : TC.move.lastAng; }
+function showDashBtn() { return MODE === 'mobile' && !OPT.mergeDash; }
+function showBarBtn() { return MODE === 'mobile' && !OPT.mergeBarrier; }
+
+cv.addEventListener('pointermove', e => {
+  const p = toPt(e);
+  if (MODE !== 'mobile') { mouse.x = p.x; mouse.y = p.y; return; }
+  if (TC.move.id === e.pointerId) setStick(TC.move, p, MOVE_R);
+  else if (TC.aim.id === e.pointerId) setStick(TC.aim, p, AIM_R);
 });
-cv.addEventListener('pointerup', e => { if (e.button === 2) mouse.deflect = false; else mouse.fire = false; });
-cv.addEventListener('pointercancel', () => { mouse.fire = false; mouse.deflect = false; });
+cv.addEventListener('pointerdown', e => {
+  const p = toPt(e);
+  if (MODE !== 'mobile') {
+    cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
+    mouse.x = p.x; mouse.y = p.y;
+    if (e.button === 2) mouse.deflect = true; else mouse.fire = true;
+    return;
+  }
+  e.preventDefault();
+  if (hitC(p, PAUSE_C, PAUSE_R + 12)) { togglePause(); return; }
+  if (G.state !== 'play') return;
+  if (hitC(p, ULT_C, ULT_R + 10)) { tryOverdrive(); return; }
+  if (showDashBtn() && hitC(p, DASH_C, BTN_R + 10)) { const a = moveAng(); tryDash(Math.cos(a), Math.sin(a)); return; }
+  if (showBarBtn() && hitC(p, BAR_C, BTN_R + 10)) { tryDeflect(moveAng()); return; }
+  if (p.x > W * 0.5) {
+    if (TC.aim.id !== -1) return;
+    TC.aim.id = e.pointerId; TC.aim.on = true;
+    TC.aim.ox = AIM_C.x; TC.aim.oy = AIM_C.y;
+    setStick(TC.aim, p, AIM_R);
+    TC.aim.pmag = TC.aim.mag; TC.aim.armed = TC.aim.mag < BARRIER_TRIG;
+  } else {
+    if (TC.move.id !== -1) return;
+    TC.move.id = e.pointerId; TC.move.on = true;
+    TC.move.ox = p.x; TC.move.oy = p.y;
+    TC.move.mag = 0; TC.move.pmag = 0; TC.move.armed = true;
+  }
+});
+function releaseTouch(e) {
+  if (MODE !== 'mobile') { if (e.button === 2) mouse.deflect = false; else mouse.fire = false; return; }
+  if (TC.move.id === e.pointerId) { TC.move.id = -1; TC.move.on = false; TC.move.mag = 0; TC.move.pmag = 0; TC.move.armed = true; }
+  else if (TC.aim.id === e.pointerId) { TC.aim.id = -1; TC.aim.on = false; TC.aim.mag = 0; TC.aim.pmag = 0; TC.aim.armed = true; }
+}
+cv.addEventListener('pointerup', releaseTouch);
+cv.addEventListener('pointercancel', e => { if (MODE === 'mobile') releaseTouch(e); else { mouse.fire = false; mouse.deflect = false; } });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- state ----------
@@ -336,7 +497,7 @@ function resetPlayer() {
     fireCD: 0, fireRate: 0.145, dmg: 11, bspd: 830, shots: 1, spread: 0.11, pierce: 0,
     dashCD: 0, dashCDMax: 0.95, dashT: 0, dvx: 0, dvy: 0,
     shieldT: 0, shieldCD: 0, shieldDur: 0.34, shieldCDMax: 0.45, arc: 1.78, sr: 40,
-    perfectWin: 0.15, deflectMul: 1, slowLen: 1, odGain: 1,
+    perfectWin: 0.15, deflectMul: 1, slowLen: 1, odGain: 1, shieldLock: null,
     od: 0, odT: 0, explosive: false, regen: false, comboDmg: 1, comboLen: 2.6,
     cards: {}
   });
@@ -411,10 +572,14 @@ function playerFire() {
   P.vx -= Math.cos(ang) * 14; P.vy -= Math.sin(ang) * 14;
   SFX.shoot();
 }
-function tryDash() {
+function tryDash(idx, idy) {
   if (P.dashCD > 0 || P.dashT > 0) return;
-  let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
-  let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+  let dx, dy;
+  if (idx !== undefined) { dx = idx; dy = idy; }
+  else {
+    dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+    dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+  }
   if (!dx && !dy) { dx = Math.cos(P.ang); dy = Math.sin(P.ang); }
   const l = len(dx, dy) || 1;
   P.dvx = dx / l * 1080; P.dvy = dy / l * 1080;
@@ -422,10 +587,12 @@ function tryDash() {
   ring(P.x, P.y, 6, 46, '120,220,255', 0.3, 2);
   SFX.dash();
 }
-function tryDeflect() {
+function tryDeflect(lockAng) {
   if (P.shieldCD > 0 || P.shieldT > 0) return;
   P.shieldT = P.shieldDur; P.shieldCD = P.shieldCDMax + P.shieldDur;
+  P.shieldLock = (lockAng === undefined) ? null : lockAng;
 }
+function shAng() { return P.shieldLock === null ? P.ang : P.shieldLock; }
 function tryOverdrive() {
   if (G.state !== 'play' || P.odT > 0 || P.od < 100) return;
   P.od = 0; P.odT = 5.0;
@@ -449,9 +616,30 @@ function hurtPlayer(n, srcx, srcy) {
 }
 
 function updatePlayer(dt) {
+  let ax = 0, ay = 0, magScale = 1;
+  if (MODE === 'mobile') {
+    // right stick: aim + auto fire
+    if (TC.aim.on && TC.aim.mag > 0.14) {
+      mouse.x = P.x + Math.cos(TC.aim.ang) * 300;
+      mouse.y = P.y + Math.sin(TC.aim.ang) * 300;
+      mouse.fire = true;
+    } else mouse.fire = false;
+    // left stick: analog movement
+    if (TC.move.on && TC.move.mag > 0.14) {
+      ax = TC.move.dx; ay = TC.move.dy;
+      magScale = clamp((TC.move.mag - 0.14) / 0.66, 0.25, 1);
+      TC.move.lastAng = TC.move.ang;
+    }
+    // flick gestures (both sticks tracked every frame to keep state consistent)
+    const mvFlick = stickFlick(TC.move, G.rdt || dt);
+    const amFlick = stickFlick(TC.aim, G.rdt || dt);
+    if (OPT.mergeDash && mvFlick) tryDash(TC.move.dx, TC.move.dy);
+    if (OPT.mergeBarrier && amFlick) tryDeflect();
+  } else {
+    ax = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+    ay = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+  }
   P.ang = Math.atan2(mouse.y - P.y, mouse.x - P.x);
-  const ax = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
-  const ay = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
   const l = len(ax, ay);
   if (P.dashT > 0) {
     P.dashT -= dt;
@@ -462,15 +650,17 @@ function updatePlayer(dt) {
     if (l > 0) { P.vx += ax / l * 2400 * dt; P.vy += ay / l * 2400 * dt; }
     const damp = Math.pow(0.0009, dt);
     P.vx *= damp; P.vy *= damp;
-    const sp = len(P.vx, P.vy), maxS = 305 * (P.odT > 0 ? 1.16 : 1);
+    const sp = len(P.vx, P.vy), maxS = 305 * (P.odT > 0 ? 1.16 : 1) * magScale;
     if (sp > maxS) { P.vx = P.vx / sp * maxS; P.vy = P.vy / sp * maxS; }
     P.x += P.vx * dt; P.y += P.vy * dt;
   }
   P.x = clamp(P.x, PAD + P.r, W - PAD - P.r);
   P.y = clamp(P.y, PAD + P.r, H - PAD - P.r);
 
-  if (keys['shift']) tryDash();
-  if (mouse.deflect) tryDeflect();
+  if (MODE !== 'mobile') {
+    if (keys['shift']) tryDash();
+    if (mouse.deflect) tryDeflect();
+  }
 
   P.inv = Math.max(0, P.inv - dt);
   P.dashCD = Math.max(0, P.dashCD - dt);
@@ -691,7 +881,7 @@ function updateEnemy(e, dt) {
     const dd = Math.hypot(e.x - P.x, e.y - P.y);
     if (dd < P.sr + e.r + 6) {
       const a = Math.atan2(e.y - P.y, e.x - P.x);
-      if (Math.abs(angDiff(a, P.ang)) < P.arc / 2) {
+      if (Math.abs(angDiff(a, shAng())) < P.arc / 2) {
         const per = shieldPerfect();
         e.shieldHit = 0.35;
         const kb = per ? 620 : 380;
@@ -871,24 +1061,143 @@ function openUpgrade() {
 
 // ---------- overlays ----------
 const ovTitle = document.getElementById('ovTitle'), ovUp = document.getElementById('ovUp'),
-  ovPause = document.getElementById('ovPause'), ovOver = document.getElementById('ovOver');
+  ovPause = document.getElementById('ovPause'), ovOver = document.getElementById('ovOver'),
+  ovMode = document.getElementById('ovMode'), ovTut = document.getElementById('ovTut');
+const $ = id => document.getElementById(id);
 const toastEl = document.getElementById('toast');
 let toastT = 0;
 function toast(s) { toastEl.textContent = s; toastEl.classList.add('on'); toastT = 2.0; }
 function togglePause() {
-  if (G.state === 'play') { G.state = 'pause'; ovPause.classList.add('on'); if (A.started) A.musicBus.gain.value = 0.08; }
+  if (G.state === 'play') { G.state = 'pause'; ovPause.classList.add('on'); resetTouch(); if (A.started) A.musicBus.gain.value = 0.08; }
   else if (G.state === 'pause') { G.state = 'play'; ovPause.classList.remove('on'); if (A.started) A.musicBus.gain.value = 0.34; }
 }
-function toggleMute() {
-  A.muted = !A.muted;
-  if (A.started) A.master.gain.value = A.muted ? 0 : 0.85;
-  toast(A.muted ? '음소거' : '소리 켜짐');
+function toggleMute() { setSound(!OPT.sound); toast(OPT.sound ? '소리 켜짐' : '음소거'); }
+function setSound(on) {
+  OPT.sound = on; A.muted = !on;
+  if (A.started) A.master.gain.value = on ? 0.85 : 0;
+  $('swSound').classList.toggle('on', on);
+  savePrefs();
 }
-document.getElementById('btnStart').onclick = () => { audioInit(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume(); startRun(); };
-document.getElementById('btnRetry').onclick = () => startRun();
+
+// ---------- mode / prefs ----------
+function applyMode() {
+  const mob = MODE === 'mobile';
+  ovMode.classList.toggle('on', MODE === null);
+  ovTitle.classList.toggle('on', MODE !== null && G.state === 'title');
+  $('keysBox').style.display = mob ? 'none' : '';
+  $('noteTail').textContent = mob ? ' · 화면을 터치해서 조작합니다' : ' · 키보드와 마우스가 필요합니다';
+  document.querySelectorAll('.setRow.mob').forEach(el => { el.style.display = mob ? '' : 'none'; });
+  $('swDash').classList.toggle('on', OPT.mergeDash);
+  $('swBarrier').classList.toggle('on', OPT.mergeBarrier);
+  $('swSound').classList.toggle('on', OPT.sound);
+  cv.style.cursor = mob ? 'default' : 'crosshair';
+  resetTouch();
+}
+async function loadPrefs() {
+  try {
+    if (window.storage) {
+      const m = await window.storage.get('deflector:mode');
+      if (m && m.value === 'pc') MODE = 'pc';
+      else if (m && m.value === 'mobile') MODE = 'mobile';
+      const o = await window.storage.get('deflector:opt');
+      if (o && o.value) Object.assign(OPT, JSON.parse(o.value));
+    }
+  } catch (e) { }
+  A.muted = !OPT.sound;
+  applyMode();
+}
+async function savePrefs() {
+  try {
+    if (window.storage) {
+      await window.storage.set('deflector:mode', MODE || '');
+      await window.storage.set('deflector:opt', JSON.stringify(OPT));
+    }
+  } catch (e) { }
+}
+$('btnPickPC').onclick = () => { MODE = 'pc'; savePrefs(); applyMode(); };
+$('btnPickMobile').onclick = () => { MODE = 'mobile'; savePrefs(); requestFS(); applyMode(); };
+$('btnModeChange').onclick = () => { MODE = null; savePrefs(); applyMode(); };
+$('swSound').onclick = () => setSound(!OPT.sound);
+$('swDash').onclick = () => { OPT.mergeDash = !OPT.mergeDash; $('swDash').classList.toggle('on', OPT.mergeDash); savePrefs(); };
+$('swBarrier').onclick = () => { OPT.mergeBarrier = !OPT.mergeBarrier; $('swBarrier').classList.toggle('on', OPT.mergeBarrier); savePrefs(); };
+
+// ---------- tutorial (mobile only) ----------
+let tutI = 0, tutBack = 'start';
+function tutSteps() {
+  return [
+    { t: '이동', b: '화면 <b>왼쪽 아래 아무 곳</b>이나 손가락을 대면 그 자리에 조이스틱이 생깁니다. 손을 떼고 다시 대면 그 위치로 옮겨집니다.<br>미는 정도에 비례해서 속도가 빨라집니다.', p: [MOVE_HOME.x, MOVE_HOME.y], r: 230 },
+    { t: '조준과 사격', b: '오른쪽 스틱은 <b>자리가 고정</b>되어 있습니다. 살짝만 밀어도 그 방향으로 <b>자동 발사</b>됩니다. 따로 공격 버튼을 누를 필요는 없습니다.', p: [AIM_C.x, AIM_C.y], r: 215 },
+    OPT.mergeBarrier
+      ? { t: '배리어', b: '오른쪽 스틱을 <b>바깥쪽 점선까지 빠르게 튕기면</b> 그 방향으로 배리어가 펼쳐집니다. 천천히 끝까지 밀면 발동하지 않습니다.<br>펼친 직후 짧은 순간에 막으면 <b>PERFECT</b>가 터지고, 배리어가 켜져 있는 동안에도 사격은 계속됩니다.', p: [AIM_C.x, AIM_C.y], r: 215 }
+      : { t: '배리어', b: '<b>배리어 버튼</b>을 누르면 현재 이동 방향으로 배리어가 펼쳐집니다.<br>펼친 직후 짧은 순간에 막으면 <b>PERFECT</b>가 터지고, 배리어가 켜져 있는 동안에도 사격은 계속됩니다.', p: [BAR_C.x, BAR_C.y], r: 120 },
+    OPT.mergeDash
+      ? { t: '대시', b: '왼쪽 스틱을 <b>바깥쪽까지 빠르게 튕기면</b> 그 방향으로 대시합니다. 대시 중에는 <b>무적</b>입니다.<br>손을 떼지 않아도 되고, 쿨타임 중에 튕기면 그냥 무시됩니다.', p: [MOVE_HOME.x, MOVE_HOME.y], r: 230 }
+      : { t: '대시', b: '<b>대시 버튼</b>을 누르면 현재 이동 방향으로 대시합니다. 대시 중에는 <b>무적</b>입니다.', p: [DASH_C.x, DASH_C.y], r: 120 },
+    { t: '궁극기', b: '버튼 테두리 게이지가 <b>한 바퀴</b>를 다 채우면 궁극기를 쓸 수 있습니다. 적을 처치하거나 탄을 반사할 때마다 충전됩니다.<br>왼쪽 위 정지 버튼에서 조작 방식을 바꿀 수 있습니다.', p: [ULT_C.x, ULT_C.y], r: 140 }
+  ];
+}
+function tutRender() {
+  const st = tutSteps(), c = st[tutI];
+  $('tutStep').textContent = 'STEP ' + (tutI + 1) + ' / ' + st.length;
+  $('tutTitle').textContent = c.t;
+  $('tutBody').innerHTML = c.b;
+  $('tutPrev').style.visibility = tutI === 0 ? 'hidden' : '';
+  $('tutNext').textContent = tutI === st.length - 1 ? '시작하기' : '다음';
+  const mk = $('tutMark');
+  mk.className = 'on';
+  mk.style.left = (c.p[0] / W * 100) + '%';
+  mk.style.top = (c.p[1] / H * 100) + '%';
+  mk.style.width = (c.r / W * 100) + '%';
+  mk.style.height = (c.r / H * 100) + '%';
+  mk.style.marginLeft = '0'; mk.style.marginTop = '0';
+  mk.style.transform = 'translate(-50%,-50%)';
+}
+function openTutorial(back) {
+  tutBack = back || 'start'; tutI = 0;
+  G.state = 'tut';
+  ovTitle.classList.remove('on'); ovPause.classList.remove('on');
+  ovTut.classList.add('on');
+  tutRender();
+}
+function closeTutorial() {
+  OPT.tutDone = true; savePrefs();
+  ovTut.classList.remove('on');
+  $('tutMark').className = '';
+  if (tutBack === 'pause') { G.state = 'pause'; ovPause.classList.add('on'); }
+  else startRun();
+}
+$('tutNext').onclick = () => { if (tutI >= tutSteps().length - 1) closeTutorial(); else { tutI++; tutRender(); } };
+$('tutPrev').onclick = () => { if (tutI > 0) { tutI--; tutRender(); } };
+$('tutSkip').onclick = closeTutorial;
+$('btnTutAgain').onclick = () => openTutorial('pause');
+// ---------- fullscreen / mobile chrome-hiding ----------
+function requestFS() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (req) { try { req.call(el); } catch (e) { } }
+  if (screen.orientation && screen.orientation.lock) { screen.orientation.lock('landscape').catch(() => { }); }
+}
+(function iosHintCheck() {
+  try {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    if (isIOS && !standalone) {
+      const h = document.getElementById('iosHint');
+      if (h) h.style.display = '';
+    }
+  } catch (e) { }
+})();
+
+document.getElementById('btnStart').onclick = () => {
+  audioInit(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume(); requestFS();
+  if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun();
+};
+document.getElementById('btnRetry').onclick = () => { requestFS(); startRun(); };
 document.getElementById('btnResume').onclick = togglePause;
 document.getElementById('btnQuit').onclick = () => {
-  G.state = 'title'; ovPause.classList.remove('on'); ovTitle.classList.add('on');
+  G.state = 'title'; ovPause.classList.remove('on'); ovTitle.classList.add('on'); resetTouch();
   if (A.started) { A.musicBus.gain.value = 0.34; A.intensity = 1; }
 };
 
@@ -901,6 +1210,7 @@ async function saveBest() {
   try { if (window.storage) await window.storage.set('deflector:best', String(G.best)); } catch (e) { }
 }
 loadBest();
+loadPrefs();
 resetPlayer();
 
 // ---------- run flow ----------
@@ -914,6 +1224,7 @@ function startRun() {
     banner: 'READY', bannerT: 1.4, hitStop: 0, pendingUp: false, slowT: 0, perfFxCD: 0
   });
   ovTitle.classList.remove('on'); ovOver.classList.remove('on'); ovPause.classList.remove('on'); ovUp.classList.remove('on');
+  ovTut.classList.remove('on'); $('tutMark').className = ''; resetTouch();
   if (A.started) { A.musicBus.gain.value = 0.34; A.intensity = 1; }
 }
 function gameOver() {
@@ -993,7 +1304,7 @@ function update(dt) {
         const ddx = b.x - P.x, ddy = b.y - P.y, dd = Math.hypot(ddx, ddy);
         if (dd < P.sr + b.r + 4 && dd > 2) {
           const approaching = (b.vx * -ddx + b.vy * -ddy) > 0;
-          if (approaching && Math.abs(angDiff(Math.atan2(ddy, ddx), P.ang)) < P.arc / 2) {
+          if (approaching && Math.abs(angDiff(Math.atan2(ddy, ddx), shAng())) < P.arc / 2) {
             doDeflect(b, shieldPerfect() || P.odT > 0);
             continue;
           }
@@ -1093,10 +1404,11 @@ function drawPlayer() {
     ctx.lineCap = 'round';
     ctx.strokeStyle = per ? 'rgba(255,215,120,' + (0.95 * a + 0.05) + ')' : 'rgba(140,255,180,' + (0.62 * a) + ')';
     ctx.lineWidth = per ? 9 : 5.5;
-    ctx.beginPath(); ctx.arc(0, 0, P.sr, P.ang - P.arc / 2, P.ang + P.arc / 2); ctx.stroke();
+    const sa = shAng();
+    ctx.beginPath(); ctx.arc(0, 0, P.sr, sa - P.arc / 2, sa + P.arc / 2); ctx.stroke();
     ctx.strokeStyle = per ? 'rgba(255,255,255,' + (0.7 * a) + ')' : 'rgba(200,255,220,' + (0.28 * a) + ')';
     ctx.lineWidth = per ? 3 : 1.6;
-    ctx.beginPath(); ctx.arc(0, 0, P.sr + (per ? 8 : 5), P.ang - P.arc / 2, P.ang + P.arc / 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, P.sr + (per ? 8 : 5), sa - P.arc / 2, sa + P.arc / 2); ctx.stroke();
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
   } else if (P.shieldCD > 0) {
@@ -1242,14 +1554,119 @@ function bar(x, y, w, h, r, colA, colB) {
   ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
   ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
 }
+function ringGauge(x, y, r, prog, col, wid) {
+  ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.lineWidth = wid;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+  if (prog > 0.001) {
+    ctx.strokeStyle = col; ctx.lineWidth = wid;
+    ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(prog, 0, 1)); ctx.stroke();
+  }
+}
+function padBtn(c, label, prog, col, ready) {
+  ctx.fillStyle = 'rgba(11,20,34,.82)';
+  ctx.beginPath(); ctx.arc(c.x, c.y, BTN_R, 0, TAU); ctx.fill();
+  ctx.strokeStyle = ready ? col : 'rgba(120,170,210,.35)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(c.x, c.y, BTN_R, 0, TAU); ctx.stroke();
+  ringGauge(c.x, c.y, BTN_R + 7, prog, col, 5);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '800 13px "Pretendard","Malgun Gothic",sans-serif';
+  ctx.fillStyle = ready ? col : 'rgba(140,175,205,.5)';
+  ctx.fillText(label, c.x, c.y);
+}
+function drawTouchUI() {
+  ctx.save();
+  ctx.lineCap = 'butt';
+  // pause
+  ctx.globalAlpha = .55; ctx.strokeStyle = '#8fd8ee'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(PAUSE_C.x, PAUSE_C.y, PAUSE_R, 0, TAU); ctx.stroke();
+  ctx.fillStyle = '#8fd8ee';
+  ctx.fillRect(PAUSE_C.x - 9, PAUSE_C.y - 10, 6, 20);
+  ctx.fillRect(PAUSE_C.x + 3, PAUSE_C.y - 10, 6, 20);
+  ctx.globalAlpha = 1;
+
+  // ---- move stick (dynamic origin) ----
+  const m = TC.move;
+  const ox = m.on ? m.ox : MOVE_HOME.x, oy = m.on ? m.oy : MOVE_HOME.y;
+  const ma = m.on ? .5 : .15;
+  ctx.globalAlpha = ma; ctx.strokeStyle = '#7fd8ff'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(ox, oy, MOVE_R, 0, TAU); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (OPT.mergeDash) {
+    const dr = clamp(1 - P.dashCD / P.dashCDMax, 0, 1);
+    ringGauge(ox, oy, MOVE_R + 10, dr, dr >= 1 ? 'rgba(180,155,255,.95)' : 'rgba(150,125,230,.5)', 5);
+  }
+  const kx = ox + m.dx * m.mag * MOVE_R, ky = oy + m.dy * m.mag * MOVE_R;
+  ctx.globalCompositeOperation = 'lighter';
+  glow('cyan', kx, ky, 44, m.on ? .38 : .12);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = m.on ? .95 : .35;
+  ctx.fillStyle = 'rgba(18,42,66,.9)'; ctx.strokeStyle = '#8ef2ff'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(kx, ky, 34, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ---- aim stick (fixed origin) ----
+  const a = TC.aim;
+  const aa = a.on ? .5 : .18;
+  ctx.globalAlpha = aa; ctx.strokeStyle = '#ffb0c0'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(AIM_C.x, AIM_C.y, AIM_R, 0, TAU); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (OPT.mergeBarrier) { // barrier threshold marker
+    const sr = clamp(1 - P.shieldCD / (P.shieldCDMax + P.shieldDur), 0, 1);
+    ringGauge(AIM_C.x, AIM_C.y, AIM_R + 10, sr, sr >= 1 ? 'rgba(255,212,105,.95)' : 'rgba(210,175,90,.45)', 5);
+    ctx.setLineDash([6, 8]);
+    ctx.globalAlpha = a.on ? .55 : .22;
+    ctx.strokeStyle = '#ffd469'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(AIM_C.x, AIM_C.y, AIM_R * BARRIER_TRIG, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  const axk = AIM_C.x + a.dx * a.mag * AIM_R, ayk = AIM_C.y + a.dy * a.mag * AIM_R;
+  ctx.globalCompositeOperation = 'lighter';
+  glow(a.mag >= BARRIER_TRIG ? 'gold' : 'red', axk, ayk, 42, a.on ? .4 : .12);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = a.on ? .95 : .35;
+  ctx.fillStyle = 'rgba(46,22,30,.9)';
+  ctx.strokeStyle = a.mag >= BARRIER_TRIG ? '#ffd469' : '#ff9aac'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(axk, ayk, 32, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ---- ultimate button ----
+  const full = P.od >= 100 && P.odT <= 0, act = P.odT > 0;
+  if (full) {
+    ctx.globalCompositeOperation = 'lighter';
+    glow('gold', ULT_C.x, ULT_C.y, 78, .28 + Math.sin(G.t * 8) * .14);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  ctx.fillStyle = 'rgba(11,20,34,.85)';
+  ctx.beginPath(); ctx.arc(ULT_C.x, ULT_C.y, ULT_R, 0, TAU); ctx.fill();
+  ctx.strokeStyle = full ? '#ffd469' : 'rgba(120,170,210,.35)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(ULT_C.x, ULT_C.y, ULT_R, 0, TAU); ctx.stroke();
+  ringGauge(ULT_C.x, ULT_C.y, ULT_R + 8, act ? P.odT / 5 : P.od / 100, act ? '#ff8a3d' : '#ffd469', 6);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '900 17px "Pretendard","Malgun Gothic",sans-serif';
+  ctx.fillStyle = full ? '#ffd469' : act ? '#ff8a3d' : 'rgba(140,175,205,.5)';
+  ctx.fillText('궁', ULT_C.x, ULT_C.y);
+
+  // ---- optional split buttons ----
+  if (showBarBtn()) {
+    const sr = clamp(1 - P.shieldCD / (P.shieldCDMax + P.shieldDur), 0, 1);
+    padBtn(BAR_C, '배리어', sr, '#ffd469', sr >= 1);
+  }
+  if (showDashBtn()) {
+    const dr = clamp(1 - P.dashCD / P.dashCDMax, 0, 1);
+    padBtn(DASH_C, '대시', dr, '#b49bff', dr >= 1);
+  }
+  ctx.restore();
+}
 function drawHUD() {
   ctx.textBaseline = 'alphabetic';
+  const MB = MODE === 'mobile';
   // cores
   ctx.textAlign = 'left';
   ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
-  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.fillText('체력', PAD + 4, PAD + 20);
+  const hpX = MB ? PAD + 78 : PAD + 4;
+  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.fillText('체력', hpX, PAD + 20);
   for (let i = 0; i < P.maxhp; i++) {
-    const x = PAD + 6 + i * 22, y = PAD + 36, on = i < P.hp;
+    const x = hpX + 2 + i * 22, y = PAD + 36, on = i < P.hp;
     ctx.save(); ctx.translate(x + 7, y); ctx.rotate(Math.PI / 4);
     if (on) {
       ctx.globalCompositeOperation = 'lighter'; glow('cyan', 0, 0, 17, .45); ctx.globalCompositeOperation = 'source-over';
@@ -1257,7 +1674,8 @@ function drawHUD() {
     } else { ctx.strokeStyle = 'rgba(120,170,210,.35)'; ctx.lineWidth = 1.5; ctx.strokeRect(-6, -6, 12, 12); }
     ctx.restore();
   }
-  // overdrive
+  // overdrive + dash bars (PC only; mobile shows them on the touch buttons)
+  if (!MB) {
   const odw = 190;
   ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
   ctx.fillText('궁극기', PAD + 4, H - PAD - 30);
@@ -1272,6 +1690,7 @@ function drawHUD() {
   ctx.fillStyle = 'rgba(140,180,215,.55)'; ctx.font = '700 9px "SFMono-Regular",Consolas,monospace';
   ctx.fillText('DASH', PAD + 4, H - PAD - 46);
   bar(PAD + 40, H - PAD - 54, 80, 5, 1 - P.dashCD / P.dashCDMax, '#a78bfa', '#e0d0ff');
+  }
 
   // score
   ctx.textAlign = 'right';
@@ -1295,7 +1714,8 @@ function drawHUD() {
   if (G.combo > 1) {
     const a = clamp(G.comboT / P.comboLen, 0, 1);
     const pop = 1 + clamp(G.comboT / P.comboLen - 0.86, 0, 1) * 1.6;
-    ctx.save(); ctx.translate(W - PAD - 60, H / 2); ctx.scale(pop, pop);
+    const cbX = MB ? W / 2 : W - PAD - 60, cbY = MB ? PAD + 118 : H / 2;
+    ctx.save(); ctx.translate(cbX, cbY); ctx.scale(pop, pop);
     ctx.textAlign = 'center';
     ctx.font = '900 46px "Helvetica Neue",Arial,sans-serif';
     ctx.fillStyle = 'rgba(255,214,120,' + (0.35 + a * 0.65) + ')';
@@ -1305,7 +1725,7 @@ function drawHUD() {
     ctx.fillText('COMBO  x' + comboMult().toFixed(2), 0, 20);
     ctx.restore();
     ctx.fillStyle = 'rgba(255,214,120,.75)';
-    ctx.fillRect(W - PAD - 118, H / 2 + 32, 116 * a, 3);
+    ctx.fillRect(cbX - 58, cbY + 32, 116 * a, 3);
   }
 
   // boss bar
@@ -1361,6 +1781,7 @@ function render() {
   }
   ctx.restore();
   if (G.state !== 'title') drawHUD();
+  if (MODE === 'mobile' && (G.state === 'play' || G.state === 'tut')) drawTouchUI();
 
   // vignette
   const vg = ctx.createRadialGradient(W / 2, H / 2, H * .34, W / 2, H / 2, H * .95);
@@ -1395,6 +1816,7 @@ function frame(now) {
   let rdt = (now - last) / 1000; last = now;
   if (!(rdt > 0)) rdt = 0;
   if (rdt > 0.06) rdt = 0.06;
+  G.rdt = rdt;
 
   musicTick();
 
@@ -1411,7 +1833,7 @@ function frame(now) {
 
   if (G.hitStop > 0) { G.hitStop -= rdt; }
   else if (G.state === 'play') update(rdt * G.ts);
-  else { G.t += rdt; if (G.state === 'over' || G.state === 'title') updateFX(rdt * G.ts); }
+  else { G.t += rdt; if (G.state === 'over' || G.state === 'title' || G.state === 'tut') updateFX(rdt * G.ts); }
 
   render();
   requestAnimationFrame(frame);
