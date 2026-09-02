@@ -2,12 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta property="og:title" content="DEFLECTOR — 반사 아레나">
-<meta property="og:description" content="공격 버튼 없이, 날아오는 탄환을 정확한 순간에 되받아치는 것만이 유일한 무기인 반사 로그라이트.">
-<meta property="og:url" content="https://hadangs516.github.io/deflector/">
-<link rel="icon" type="image/png" href="favicon.png">
-<meta property="og:image" content="https://hadangs516.github.io/deflector/og-image.png">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DEFLECTOR — 반사 아레나</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -119,6 +117,49 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
   color:#7c93ad;background:rgba(8,14,26,.8);border:1px solid rgba(120,190,240,.22);cursor:pointer;z-index:5}
 #btnModeChange:hover{color:#7fd8ff;border-color:#7fd8ff}
 @media (max-width:620px){.keys{grid-template-columns:1fr 1fr}}
+
+.modeCard.diffCard{width:clamp(94px,12vw,148px);text-align:center;padding:clamp(20px,2.6vw,34px) 10px}
+.modeCard.diffCard .ic{font-size:clamp(34px,4.6vw,56px);font-weight:900}
+.rng{flex:0 0 auto;width:clamp(96px,17vw,150px);accent-color:#5ce1ff;background:transparent}
+
+/* 아이폰: 주소창/제스처 바를 피해 화면을 줄이고 아래쪽으로 붙인다 */
+body.iphone #wrap{align-items:flex-end}
+body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
+  height:min(calc(var(--vh100)*0.80),calc(96vw*9/16));margin-bottom:1.6vh}
+
+/* 가로 모드 폰처럼 세로가 짧을 때 오버레이가 잘리지 않도록 전체 축소 */
+.ov{overflow-y:auto}
+@media (max-height:520px){
+  .ov{padding:2%}
+  .eyebrow{margin-bottom:5px;letter-spacing:.38em}
+  .title{font-size:clamp(34px,7vw,60px)}
+  .hd{font-size:clamp(18px,3.2vw,26px)}
+  .tagline{margin-top:7px;font-size:11px;line-height:1.55}
+  .btn{margin-top:12px;padding:9px 26px;font-size:12px;letter-spacing:.16em}
+  .btn.ghost{margin-top:8px;padding:7px 18px;font-size:10px}
+  .cards{margin-top:11px;gap:8px;flex-wrap:nowrap}
+  .card{width:clamp(100px,14.5vw,168px);min-height:0;padding:10px}
+  .card .sym{font-size:20px}
+  .card .nm{font-size:12px}
+  .card .ds{font-size:10px;margin-top:5px;line-height:1.45}
+  .card .tag{margin-top:6px;font-size:8px}
+  .stats{margin-top:12px}
+  .st{padding:8px 6px}
+  .st .k{font-size:8px}
+  .st .v{font-size:17px}
+  .keys{margin-top:11px;gap:4px 10px}
+  .krow{padding:4px 8px}
+  .note{margin-top:9px}
+  .setBox{margin-top:10px}
+  .setRow{padding:7px 10px;margin-top:5px}
+  .setRow .lb small{margin-top:2px}
+  .modeRow{margin-top:14px;gap:10px}
+  .modeCard{padding:14px 12px}
+  .modeCard.diffCard{padding:16px 10px}
+  .tutPanel{margin-top:2vh;padding:12px}
+  .tutBtns{margin-top:10px}
+  #tutSkip{top:8px;right:10px;padding:7px 13px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -138,7 +179,7 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
       <div class="modeCard" id="btnPickMobile">
         <div class="ic">☰</div>
         <div class="t">모바일로 플레이</div>
-        <div class="s">화면 터치 조이스틱으로 조작합니다. 튜토리얼이 함께 제공됩니다.</div>
+        <div class="s">화면 터치 조이스틱으로 조작합니다.</div>
       </div>
     </div>
   </div>
@@ -163,6 +204,21 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
     <div class="note" id="iosHint" style="display:none">아이폰에서 주소창까지 완전히 없애려면, 공유 버튼 → "홈 화면에 추가" 후 아이콘으로 실행하세요</div>
   </div>
 
+  <div class="ov" id="ovDev">
+    <div class="eyebrow">Device Check</div>
+    <div class="hd" id="devTitle">기기 확인</div>
+    <div class="tagline" id="devMsg"></div>
+    <div class="modeRow" id="devRow"></div>
+  </div>
+
+  <div class="ov" id="ovDiff">
+    <div class="eyebrow">Select Difficulty</div>
+    <div class="hd">난이도</div>
+    <div class="tagline">적의 수, 체력, 발사 빈도만 달라집니다.<br>내 조작과 성장 속도는 어느 쪽이든 똑같습니다.</div>
+    <div class="modeRow" id="diffRow"></div>
+    <button class="btn ghost" id="btnDiffBack">뒤로</button>
+  </div>
+
   <div class="ov" id="ovUp">
     <div class="eyebrow">Wave Clear · 코어 업그레이드</div>
     <div class="hd">하나를 고르세요</div>
@@ -173,8 +229,14 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
     <div class="eyebrow">Paused</div>
     <div class="hd">일시정지</div>
     <div class="setBox">
-      <div class="setRow"><div class="lb">소리<small>효과음과 배경음악을 함께 켜고 끕니다</small></div>
+      <div class="setRow"><div class="lb">소리<small>전체 음소거 (PC는 M 키)</small></div>
         <div class="sw on" id="swSound"></div></div>
+      <div class="setRow"><div class="lb">효과음<small><span id="volSfxVal">50</span> / 100</small></div>
+        <input type="range" min="0" max="100" step="5" class="rng" id="volSfx"></div>
+      <div class="setRow"><div class="lb">배경음악<small><span id="volMusVal">50</span> / 100</small></div>
+        <input type="range" min="0" max="100" step="5" class="rng" id="volMus"></div>
+      <div class="setRow mob"><div class="lb">기기 종류<small><span id="devLabel">기타</span></small></div>
+        <button class="miniBtn" id="btnDevAgain">변경</button></div>
       <div class="setRow mob"><div class="lb">대시를 이동 스틱에 합치기<small>끄면 오른쪽에 대시 버튼이 생깁니다</small></div>
         <div class="sw on" id="swDash"></div></div>
       <div class="setRow mob"><div class="lb">배리어를 조준 스틱에 합치기<small>끄면 오른쪽에 배리어 버튼이 생깁니다</small></div>
@@ -212,7 +274,8 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
       <div class="st"><div class="k">MAX COMBO</div><div class="v mono" id="oCombo">0</div></div>
     </div>
     <button class="btn" id="btnRetry">다시 하기</button>
-    <div class="note">R 키로도 재시작</div>
+    <button class="btn ghost" id="btnHome">메인 화면으로</button>
+    <div class="note">R 키로도 재시작 · 난이도 <span id="oDiff">상</span></div>
   </div>
 
   <div id="toast"></div>
@@ -238,10 +301,30 @@ function angDiff(a, b) { let d = (a - b) % TAU; if (d > Math.PI) d -= TAU; if (d
 const W = 1280, H = 720, PAD = 30;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
+let MODE = null;
 let DPR = 1;
+let bgGrad = null, vigGrad = null, gridCv = null;
+function buildBG() {
+  bgGrad = ctx.createRadialGradient(W / 2, H * .42, 60, W / 2, H * .42, W * .72);
+  bgGrad.addColorStop(0, '#0b1322'); bgGrad.addColorStop(1, '#04060c');
+  vigGrad = ctx.createRadialGradient(W / 2, H / 2, H * .34, W / 2, H / 2, H * .95);
+  vigGrad.addColorStop(0, 'rgba(0,0,0,0)'); vigGrad.addColorStop(1, 'rgba(0,0,0,.72)');
+  // 격자는 매 프레임 60여 개의 선을 다시 긋는 대신 한 번만 구워둔다
+  gridCv = document.createElement('canvas');
+  gridCv.width = Math.round(W * DPR); gridCv.height = Math.round(H * DPR);
+  const g = gridCv.getContext('2d');
+  g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  g.lineWidth = 1; g.strokeStyle = 'rgb(70,140,200)';
+  g.beginPath();
+  for (let x = 0; x <= W; x += 64) { g.moveTo(x, 0); g.lineTo(x, H); }
+  for (let y = 0; y <= H; y += 64) { g.moveTo(0, y); g.lineTo(W, y); }
+  g.stroke();
+}
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  // 모바일은 픽셀 수를 줄여 프레임을 확보한다 (2.0 -> 1.5 는 픽셀 44% 감소)
+  DPR = Math.min(window.devicePixelRatio || 1, MODE === 'mobile' ? 1.5 : 2);
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  buildBG();
 }
 resize();
 window.addEventListener('resize', resize);
@@ -294,6 +377,7 @@ function audioInit() {
   A.noise = n;
   A.nextTime = A.ctx.currentTime + 0.08;
   A.started = true;
+  applyVolumes();
 }
 function tone(freq, dur, type, vol, t0, slideTo, bus) {
   if (!A.started || A.muted) return;
@@ -400,15 +484,45 @@ addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouse.fi
 function toPt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
 
 // ---------- mobile control layout (logical 1280x720 coords) ----------
-let MODE = null;
-const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true };
-const MOVE_R = 92, AIM_R = 84, BTN_R = 38, ULT_R = 46, PAUSE_R = 28;
-const MOVE_HOME = { x: 224, y: H - 168 };
-const AIM_C = { x: W - 172, y: H - 158 };
-const ULT_C = { x: W - 322, y: H - 104 };
-const BAR_C = { x: W - 312, y: H - 232 };
-const DASH_C = { x: W - 202, y: H - 310 };
+let DIFF = 1;
+const DIFFS = [
+  { id: 'hard', n: '상', v: 1.00, s: '원래 밸런스. 적이 가장 많고 단단합니다.' },
+  { id: 'norm', n: '중', v: 0.75, s: '적의 수, 체력, 발사 빈도가 75%로 줄어듭니다.' },
+  { id: 'easy', n: '하', v: 0.50, s: '적의 수, 체력, 발사 빈도가 절반입니다. 처음이라면 여기부터.' }
+];
+const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true, diff: 1, dev: '', volSfx: 50, volMus: 50 };
+const UA = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+const IS_ANDROID = /android/i.test(UA);
+const IS_IPHONE = /iphone|ipod/i.test(UA);
+const IS_IPAD = /ipad/i.test(UA) ||
+  (typeof navigator !== 'undefined' && navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let MOVE_R = 92, AIM_R = 84, BTN_R = 38, ULT_R = 46;
+const PAUSE_R = 28;
+let MOVE_HOME = { x: 224, y: H - 168 };
+let AIM_C = { x: W - 172, y: H - 158 };
+let ULT_C = { x: W - 322, y: H - 104 };
+let BAR_C = { x: W - 312, y: H - 232 };
+let DASH_C = { x: W - 202, y: H - 310 };
 const PAUSE_C = { x: 64, y: 58 };
+// 아이폰은 전체화면이 불가능해 화면이 작아지므로, 조작부를 양쪽 가장자리로 밀어
+// 게임 화면을 최대한 가리지 않게 한다.
+function layoutTouch(iph) {
+  if (iph) {
+    MOVE_R = 74; AIM_R = 68; BTN_R = 32; ULT_R = 38;
+    MOVE_HOME = { x: 98, y: H - 104 };
+    AIM_C = { x: W - 98, y: H - 104 };
+    ULT_C = { x: W - 98, y: H - 248 };
+    BAR_C = { x: W - 208, y: H - 92 };
+    DASH_C = { x: W - 208, y: H - 208 };
+  } else {
+    MOVE_R = 92; AIM_R = 84; BTN_R = 38; ULT_R = 46;
+    MOVE_HOME = { x: 224, y: H - 168 };
+    AIM_C = { x: W - 172, y: H - 158 };
+    ULT_C = { x: W - 322, y: H - 104 };
+    BAR_C = { x: W - 312, y: H - 232 };
+    DASH_C = { x: W - 202, y: H - 310 };
+  }
+}
 const BARRIER_TRIG = 0.90, FLICK_RATE = 2.2;
 
 function mkStick(hx, hy) {
@@ -731,14 +845,14 @@ const TYPES = {
 };
 function spawnEnemy(type, x, y) {
   const t = TYPES[type];
-  const hpS = 1 + (G.wave - 1) * 0.10;
+  const hpS = (1 + (G.wave - 1) * 0.10) * DIFF;
   const e = {
     type, x, y, vx: 0, vy: 0, r: t.r, col: t.col, glow: t.glow,
     hp: t.hp * hpS, max: t.hp * hpS, t: rand(0, 6), fire: rand(0.6, 1.8),
     flash: 0, rot: rand(0, TAU), state: 0, stateT: 0, shieldHit: 0, score: t.score
   };
   if (type === 'boss') {
-    e.hp = e.max = 520 + G.wave * 108;
+    e.hp = e.max = (520 + G.wave * 108) * DIFF;
     e.pattern = 0; e.patT = 2.0; e.tx = W / 2; e.ty = 220;
   }
   if (type === 'spiral') { e.orbA = Math.atan2(y - H / 2, x - W / 2); e.orbR = rand(190, 270); e.sp = rand(0.35, 0.6) * (Math.random() < 0.5 ? 1 : -1); }
@@ -801,7 +915,7 @@ function updateEnemy(e, dt) {
       e.vy = lerp(e.vy, (ay * push + ax * st) * s, 2.6 * dt);
       e.fire -= dt;
       if (e.fire <= 0 && d < 620) {
-        e.fire = Math.max(0.75, 1.7 - G.wave * 0.03);
+        e.fire = Math.max(0.75, 1.7 - G.wave * 0.03) / DIFF;
         const a = Math.atan2(dy, dx);
         eShoot(e, a, 320, 1, 6.5);
         spark(e.x + ax * e.r, e.y + ay * e.r, 4, 'orange', 160, { ang: a, spread: 0.3 });
@@ -816,7 +930,7 @@ function updateEnemy(e, dt) {
       e.rot += dt * 1.4;
       e.fire -= dt;
       if (e.fire <= 0 && d < 700) {
-        e.fire = Math.max(1.2, 2.3 - G.wave * 0.03);
+        e.fire = Math.max(1.2, 2.3 - G.wave * 0.03) / DIFF;
         const a = Math.atan2(dy, dx);
         for (let i = -2; i <= 2; i++) eShoot(e, a + i * 0.20, 262, 1, 7);
         ring(e.x, e.y, e.r, e.r + 26, e.col, 0.26, 2);
@@ -859,7 +973,7 @@ function updateEnemy(e, dt) {
       e.rot += dt * 2.6;
       e.fire -= dt;
       if (e.fire <= 0) {
-        e.fire = 0.26;
+        e.fire = 0.26 / DIFF;
         for (let i = 0; i < 2; i++) eShoot(e, e.rot + i * Math.PI, 205, 1, 6);
       }
       break;
@@ -932,14 +1046,14 @@ function updateBoss(e, dt, ax, ay, d) {
   }
   if (e.patT <= 0) {
     e.pattern = (e.pattern + 1) % 4;
-    e.patT = 2.7 / rage;
+    e.patT = 2.7 / rage / DIFF;
     if (e.pattern === 0) { // radial
-      const n = 26;
+      const n = Math.max(8, Math.round(26 * DIFF));
       const off = rand(0, TAU);
       for (let i = 0; i < n; i++) eShoot(e, off + i * TAU / n, 215 * rage, 1, 7);
       ring(e.x, e.y, e.r, e.r + 130, e.col, 0.4, 4); shake(8);
-    } else if (e.pattern === 1) { e.burst = 3; e.burstT = 0; e.burstGap = 0.24; }
-    else if (e.pattern === 2) { e.burst = 12; e.burstT = 0; e.burstGap = 0.11; }
+    } else if (e.pattern === 1) { e.burst = Math.max(1, Math.round(3 * DIFF)); e.burstT = 0; e.burstGap = 0.24 / DIFF; }
+    else if (e.pattern === 2) { e.burst = Math.max(3, Math.round(12 * DIFF)); e.burstT = 0; e.burstGap = 0.11 / DIFF; }
     else {
       for (let i = 0; i < 3; i++) {
         const a = rand(0, TAU);
@@ -971,14 +1085,15 @@ function startWave(n) {
   if (n % 5 === 0) {
     G.banner = 'BOSS'; G.bannerT = 2.2;
     queueSpawn('boss', W / 2, 170, 1.3);
-    for (let i = 0; i < 3 + Math.floor(n / 5); i++) { const p = edgePoint(); queueSpawn('drone', p.x, p.y, rand(1.4, 2.2)); }
+    const adds = Math.max(1, Math.round((3 + Math.floor(n / 5)) * DIFF));
+    for (let i = 0; i < adds; i++) { const p = edgePoint(); queueSpawn('drone', p.x, p.y, rand(1.4, 2.2)); }
     SFX.boss();
     return;
   }
   SFX.wave();
   if (n === 2) addText(W / 2, H / 2 + 62, '적탄은 우클릭 / SPACE 로 되받아치세요', '150,255,180', 20, 3.4);
   if (n === 3) addText(W / 2, H / 2 + 62, '배리어를 켠 직후 0.15초가 PERFECT 판정', '255,205,90', 20, 3.4);
-  let budget = 6 + n * 3.4;
+  let budget = (6 + n * 3.4) * DIFF;
   const pool = [];
   pool.push('drone', 'drone');
   if (n >= 2) pool.push('gunner', 'gunner');
@@ -1064,28 +1179,48 @@ function openUpgrade() {
 // ---------- overlays ----------
 const ovTitle = document.getElementById('ovTitle'), ovUp = document.getElementById('ovUp'),
   ovPause = document.getElementById('ovPause'), ovOver = document.getElementById('ovOver'),
-  ovMode = document.getElementById('ovMode'), ovTut = document.getElementById('ovTut');
+  ovMode = document.getElementById('ovMode'), ovTut = document.getElementById('ovTut'),
+  ovDiff = document.getElementById('ovDiff'), ovDev = document.getElementById('ovDev');
 const $ = id => document.getElementById(id);
 const toastEl = document.getElementById('toast');
 let toastT = 0;
 function toast(s) { toastEl.textContent = s; toastEl.classList.add('on'); toastT = 2.0; }
 function togglePause() {
-  if (G.state === 'play') { G.state = 'pause'; ovPause.classList.add('on'); resetTouch(); if (A.started) A.musicBus.gain.value = 0.08; }
-  else if (G.state === 'pause') { G.state = 'play'; ovPause.classList.remove('on'); if (A.started) A.musicBus.gain.value = 0.34; }
+  if (G.state === 'play') { G.state = 'pause'; ovPause.classList.add('on'); resetTouch(); syncVolUI(); applyVolumes(); }
+  else if (G.state === 'pause') { G.state = 'play'; ovPause.classList.remove('on'); applyVolumes(); }
 }
 function toggleMute() { setSound(!OPT.sound); toast(OPT.sound ? '소리 켜짐' : '음소거'); }
 function setSound(on) {
   OPT.sound = on; A.muted = !on;
-  if (A.started) A.master.gain.value = on ? 0.85 : 0;
   $('swSound').classList.toggle('on', on);
-  savePrefs();
+  applyVolumes(); savePrefs();
 }
+// 슬라이더 50 = 기존 볼륨. 100이면 두 배까지 올라간다.
+function applyVolumes() {
+  if (!A.started) return;
+  A.master.gain.value = OPT.sound ? 0.85 : 0;
+  A.musicBus.gain.value = (G.state === 'pause' ? 0.09 : 0.34) * (OPT.volMus / 50);
+  A.sfxBus.gain.value = 0.62 * (OPT.volSfx / 50);
+}
+function syncVolUI() {
+  $('volSfx').value = OPT.volSfx; $('volSfxVal').textContent = OPT.volSfx;
+  $('volMus').value = OPT.volMus; $('volMusVal').textContent = OPT.volMus;
+}
+$('volSfx').oninput = e => { OPT.volSfx = +e.target.value; $('volSfxVal').textContent = OPT.volSfx; applyVolumes(); savePrefs(); };
+$('volMus').oninput = e => { OPT.volMus = +e.target.value; $('volMusVal').textContent = OPT.volMus; applyVolumes(); savePrefs(); };
 
 // ---------- mode / prefs ----------
 function applyMode() {
   const mob = MODE === 'mobile';
+  const iph = mob && OPT.dev === 'iphone';
+  if (document.body && document.body.classList) document.body.classList.toggle('iphone', iph);
+  layoutTouch(iph);
+  resize();
+  $('devLabel').textContent = iph ? '아이폰' : '기타';
+  ovDev.classList.remove('on');
   ovMode.classList.toggle('on', MODE === null);
-  ovTitle.classList.toggle('on', MODE !== null && G.state === 'title');
+  ovTitle.classList.toggle('on', MODE !== null && (G.state === 'title' || devBack === 'mode'));
+  if (devBack === 'pause' && G.state === 'pause') { ovTitle.classList.remove('on'); ovPause.classList.add('on'); }
   $('keysBox').style.display = mob ? 'none' : '';
   $('noteTail').textContent = mob ? ' · 화면을 터치해서 조작합니다' : ' · 키보드와 마우스가 필요합니다';
   document.querySelectorAll('.setRow.mob').forEach(el => { el.style.display = mob ? '' : 'none'; });
@@ -1106,6 +1241,8 @@ async function loadPrefs() {
     }
   } catch (e) { }
   A.muted = !OPT.sound;
+  if (DIFFS.some(d => d.v === OPT.diff)) DIFF = OPT.diff;
+  syncVolUI(); applyVolumes();
   applyMode();
 }
 async function savePrefs() {
@@ -1116,8 +1253,77 @@ async function savePrefs() {
     }
   } catch (e) { }
 }
+function diffName() { const d = DIFFS.find(x => x.v === DIFF); return d ? d.n : '상'; }
+function buildDiffCards() {
+  const row = $('diffRow'); row.innerHTML = '';
+  DIFFS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'modeCard';
+    el.className = 'modeCard diffCard';
+    el.innerHTML = '<div class="ic">' + d.n + '</div>';
+    el.onclick = () => {
+      DIFF = d.v; OPT.diff = d.v; savePrefs();
+      ovDiff.classList.remove('on');
+      if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun();
+    };
+    row.appendChild(el);
+  });
+}
+function openDiff() {
+  buildDiffCards();
+  ovTitle.classList.remove('on');
+  ovDiff.classList.add('on');
+}
+function goHome() {
+  G.state = 'title'; resetTouch();
+  ovOver.classList.remove('on'); ovPause.classList.remove('on');
+  ovUp.classList.remove('on'); ovDiff.classList.remove('on'); ovTut.classList.remove('on');
+  $('tutMark').className = '';
+  ovTitle.classList.add('on');
+  A.intensity = 1; applyVolumes();
+}
+$('btnDiffBack').onclick = () => { ovDiff.classList.remove('on'); ovTitle.classList.add('on'); };
+$('btnHome').onclick = goHome;
+function devBtn(label, fn) {
+  const el = document.createElement('div');
+  el.className = 'modeCard diffCard';
+  el.innerHTML = '<div class="ic" style="font-size:clamp(15px,2vw,22px)">' + label + '</div>';
+  el.onclick = fn;
+  return el;
+}
+function openDev(mode) {
+  const row = $('devRow'); row.innerHTML = '';
+  ovMode.classList.remove('on'); ovTitle.classList.remove('on'); ovPause.classList.remove('on');
+  if (mode === 'confirm') {
+    $('devTitle').textContent = '기기 확인';
+    $('devMsg').innerHTML = '아이폰을 감지했습니다. 아이폰이 맞나요?<br>아이폰은 전체화면을 지원하지 않아 화면 배치가 달라집니다.';
+    row.appendChild(devBtn('예, 아이폰입니다', () => { setDev('iphone'); }));
+    row.appendChild(devBtn('아니요', () => openDev('pick')));
+  } else {
+    $('devTitle').textContent = '기기 선택';
+    $('devMsg').textContent = '사용 중인 기기를 골라주세요.';
+    row.appendChild(devBtn('아이폰', () => setDev('iphone')));
+    row.appendChild(devBtn('아이패드', () => setDev('other')));
+    row.appendChild(devBtn('안드로이드', () => setDev('other')));
+    row.appendChild(devBtn('기타', () => setDev('other')));
+  }
+  ovDev.classList.add('on');
+}
+function setDev(d) {
+  OPT.dev = d; MODE = 'mobile';
+  ovDev.classList.remove('on');
+  savePrefs(); requestFS(); applyMode();
+}
+$('btnDevAgain').onclick = () => { devBack = 'pause'; openDev('pick'); };
+let devBack = 'mode';
 $('btnPickPC').onclick = () => { MODE = 'pc'; savePrefs(); applyMode(); };
-$('btnPickMobile').onclick = () => { MODE = 'mobile'; savePrefs(); requestFS(); applyMode(); };
+$('btnPickMobile').onclick = () => {
+  if (OPT.dev === 'iphone' || OPT.dev === 'other') { MODE = 'mobile'; savePrefs(); requestFS(); applyMode(); return; }
+  devBack = 'mode';
+  if (IS_IPHONE) openDev('confirm');
+  else if (IS_IPAD) openDev('pick');
+  else setDev('other');
+};
 $('btnModeChange').onclick = () => { MODE = null; savePrefs(); applyMode(); };
 $('swSound').onclick = () => setSound(!OPT.sound);
 $('swDash').onclick = () => { OPT.mergeDash = !OPT.mergeDash; $('swDash').classList.toggle('on', OPT.mergeDash); savePrefs(); };
@@ -1174,6 +1380,7 @@ $('tutSkip').onclick = closeTutorial;
 $('btnTutAgain').onclick = () => openTutorial('pause');
 // ---------- fullscreen / mobile chrome-hiding ----------
 function requestFS() {
+  if (!IS_ANDROID) return; // PC/아이폰에서는 전체화면 전환을 시도하지 않는다
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
   if (req) { try { req.call(el); } catch (e) { } }
@@ -1194,14 +1401,11 @@ function requestFS() {
 
 document.getElementById('btnStart').onclick = () => {
   audioInit(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume(); requestFS();
-  if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun();
+  openDiff();
 };
 document.getElementById('btnRetry').onclick = () => { requestFS(); startRun(); };
 document.getElementById('btnResume').onclick = togglePause;
-document.getElementById('btnQuit').onclick = () => {
-  G.state = 'title'; ovPause.classList.remove('on'); ovTitle.classList.add('on'); resetTouch();
-  if (A.started) { A.musicBus.gain.value = 0.34; A.intensity = 1; }
-};
+document.getElementById('btnQuit').onclick = goHome;
 
 // ---------- best score ----------
 async function loadBest() {
@@ -1226,8 +1430,8 @@ function startRun() {
     banner: 'READY', bannerT: 1.4, hitStop: 0, pendingUp: false, slowT: 0, perfFxCD: 0
   });
   ovTitle.classList.remove('on'); ovOver.classList.remove('on'); ovPause.classList.remove('on'); ovUp.classList.remove('on');
-  ovTut.classList.remove('on'); $('tutMark').className = ''; resetTouch();
-  if (A.started) { A.musicBus.gain.value = 0.34; A.intensity = 1; }
+  ovTut.classList.remove('on'); ovDiff.classList.remove('on'); $('tutMark').className = ''; resetTouch();
+  A.intensity = 1; applyVolumes();
 }
 function gameOver() {
   G.state = 'over';
@@ -1244,12 +1448,14 @@ function gameOver() {
   document.getElementById('oPerf').textContent = G.perfects;
   document.getElementById('oCombo').textContent = G.maxCombo;
   document.getElementById('bestTitle').textContent = G.best.toLocaleString();
+  $('oDiff').textContent = diffName();
   setTimeout(() => { if (G.state === 'over') ovOver.classList.add('on'); }, 850);
 }
 
 // ---------- update ----------
 function updateFX(dt) {
-  if (parts.length > 900) parts.splice(0, parts.length - 900);
+  const PMAX = MODE === 'mobile' ? 420 : 800;
+  if (parts.length > PMAX) parts.splice(0, parts.length - PMAX);
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
     p.life -= dt;
@@ -1350,12 +1556,10 @@ function update(dt) {
 
 // ---------- render ----------
 function drawGrid(pulse) {
+  ctx.globalAlpha = 0.055 + pulse * 0.05;
+  if (gridCv) ctx.drawImage(gridCv, 0, 0, W, H);
+  ctx.globalAlpha = 1;
   ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(70,140,200,' + (0.055 + pulse * 0.05) + ')';
-  ctx.beginPath();
-  for (let x = 0; x <= W; x += 64) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-  for (let y = 0; y <= H; y += 64) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
-  ctx.stroke();
   // border
   ctx.strokeStyle = 'rgba(90,200,255,' + (0.30 + pulse * 0.25) + ')';
   ctx.lineWidth = 2;
@@ -1505,10 +1709,12 @@ function drawBullets() {
 }
 function drawParts() {
   ctx.globalCompositeOperation = 'lighter';
+  // 파티클이 많이 쌓이면 글로우 스프라이트를 생략해 드로우콜을 줄인다
+  const cheap = parts.length > (MODE === 'mobile' ? 150 : 260);
   for (const p of parts) {
     const a = clamp(p.life / p.max, 0, 1);
     if (p.kind === 'spark') {
-      glow(p.col, p.x, p.y, p.r * 4.5 * a + 2, 0.55 * a);
+      if (!cheap) glow(p.col, p.x, p.y, p.r * 4.5 * a + 2, 0.55 * a);
       ctx.strokeStyle = 'rgba(255,255,255,' + (0.75 * a) + ')'; ctx.lineWidth = p.r * .8;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.016, p.y - p.vy * 0.016); ctx.stroke();
     } else {
@@ -1548,10 +1754,17 @@ function drawTexts() {
     ctx.fillText(t.s, t.x, t.y);
   }
 }
+let bossGrad = null;
+const barGrads = {};
 function bar(x, y, w, h, r, colA, colB) {
   ctx.fillStyle = 'rgba(255,255,255,.10)'; ctx.fillRect(x, y, w, h);
-  const g = ctx.createLinearGradient(x, 0, x + w, 0);
-  g.addColorStop(0, colA); g.addColorStop(1, colB);
+  const key = x + ':' + w + ':' + colA + colB;
+  let g = barGrads[key];
+  if (!g) {
+    g = ctx.createLinearGradient(x, 0, x + w, 0);
+    g.addColorStop(0, colA); g.addColorStop(1, colB);
+    barGrads[key] = g;
+  }
   ctx.fillStyle = g; ctx.fillRect(x, y, w * clamp(r, 0, 1), h);
   ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
   ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
@@ -1735,9 +1948,8 @@ function drawHUD() {
     const bw = 620, bx = W / 2 - bw / 2, by = PAD + 62;
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(bx, by, bw, 12);
     const r = clamp(boss.hp / boss.max, 0, 1);
-    const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
-    g.addColorStop(0, '#ff3b6b'); g.addColorStop(1, '#ff9a4d');
-    ctx.fillStyle = g; ctx.fillRect(bx, by, bw * r, 12);
+    if (!bossGrad) { bossGrad = ctx.createLinearGradient(bx, 0, bx + bw, 0); bossGrad.addColorStop(0, '#ff3b6b'); bossGrad.addColorStop(1, '#ff9a4d'); }
+    ctx.fillStyle = bossGrad; ctx.fillRect(bx, by, bw * r, 12);
     ctx.strokeStyle = 'rgba(255,140,160,.6)'; ctx.lineWidth = 1; ctx.strokeRect(bx + .5, by + .5, bw - 1, 11);
     ctx.textAlign = 'center'; ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
     ctx.fillStyle = 'rgba(255,190,200,.9)'; ctx.fillText('SENTINEL  ' + Math.ceil(boss.hp), W / 2, by - 5);
@@ -1756,9 +1968,7 @@ function drawHUD() {
 }
 function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  const bg = ctx.createRadialGradient(W / 2, H * .42, 60, W / 2, H * .42, W * .72);
-  bg.addColorStop(0, '#0b1322'); bg.addColorStop(1, '#04060c');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
 
   const sx = G.shake ? rand(-G.shake, G.shake) : 0;
   const sy = G.shake ? rand(-G.shake, G.shake) : 0;
@@ -1786,9 +1996,7 @@ function render() {
   if (MODE === 'mobile' && (G.state === 'play' || G.state === 'tut')) drawTouchUI();
 
   // vignette
-  const vg = ctx.createRadialGradient(W / 2, H / 2, H * .34, W / 2, H / 2, H * .95);
-  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.72)');
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = vigGrad; ctx.fillRect(0, 0, W, H);
 
   // low hp warning
   if (G.state === 'play' && P.hp === 1) {
