@@ -103,6 +103,27 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 .miniBtn:hover{background:rgba(60,180,255,.12)}
 
 #ovTut{justify-content:flex-start;background:rgba(3,5,11,.55)}
+#ovPause,#ovRank{justify-content:flex-start}
+
+/* 모바일(세로 화면 기준): 작다고 지적된 보조 텍스트·버튼류를 전반적으로 확대.
+   vw 기반 clamp()의 하한값이 좁은 폰 화면에서는 사실상 항상 그 하한으로
+   고정되어 실제 화면에서 작게 보였음. */
+body.mobile .eyebrow{font-size:11px}
+body.mobile .tagline{font-size:14px;line-height:1.6}
+body.mobile .note{font-size:12px}
+body.mobile .btn{font-size:14px;padding:15px 36px}
+body.mobile .btn.ghost{font-size:13px;padding:11px 26px}
+body.mobile .modeCard .t{font-size:16px}
+body.mobile .modeCard .s{font-size:12px}
+body.mobile .modeCard.diffCard .ic{font-size:40px}
+body.mobile .modeCard.diffCard .tag2{font-size:10px}
+body.mobile .setRow{padding:13px 15px}
+body.mobile .setRow .lb{font-size:13px}
+body.mobile .setRow .lb small{font-size:11px}
+body.mobile .miniBtn{font-size:12px;padding:9px 16px}
+body.mobile .rankRow{font-size:13px}
+body.mobile .rankRow .rw{font-size:12px}
+body.mobile .nickInput{font-size:16px}
 .tutPanel{margin-top:6vh;max-width:min(560px,88vw);padding:clamp(14px,2vw,22px);
   background:rgba(7,13,24,.95);border:1px solid rgba(120,190,240,.28)}
 .tutStep{font-size:10px;letter-spacing:.28em;color:#5ce1ff}
@@ -186,6 +207,16 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
   .modeCard.diffCard{padding:16px 10px}
   .rankBox{margin-top:10px;max-height:38vh}
   .nickInput{margin-top:10px}
+  body.mobile .hd{font-size:clamp(20px,4.2vw,28px)}
+  body.mobile .tagline{font-size:12px}
+  body.mobile .btn{font-size:13px;padding:11px 30px}
+  body.mobile .btn.ghost{font-size:12px;padding:9px 22px}
+  body.mobile .setRow{padding:9px 12px}
+  body.mobile .setRow .lb{font-size:12px}
+  body.mobile .setRow .lb small{font-size:10px}
+  body.mobile .miniBtn{font-size:11px;padding:7px 14px}
+  body.mobile .rankRow{font-size:12px}
+  body.mobile .note{font-size:11px}
   .tutPanel{margin-top:2vh;padding:12px}
   .tutBtns{margin-top:10px}
   #tutSkip{top:8px;right:10px;padding:7px 13px;font-size:10px}
@@ -552,7 +583,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { const k = e.key.toLowerCase(); keys[k] = false; if (k === ' ') mouse.deflect = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouse.fire = mouse.deflect = false; });
-function toPt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+function toPt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H, cx: e.clientX, cy: e.clientY }; }
 
 // ---------- mobile control layout (logical 1280x720 coords) ----------
 let DIFF = 1;
@@ -615,7 +646,8 @@ function layoutTouch(iph) {
     DASH_C = { x: W - 202, y: H - 310 };
   }
 }
-const FLICK_WINDOW = 0.12, FLICK_SPEED = 440, FLICK_REARM_SPEED = 170, FLICK_GLOW = 300;
+// 아래 세 상수는 이제 화면상 CSS 픽셀/초 기준(기기·캔버스 크기와 무관).
+const FLICK_WINDOW = 0.12, FLICK_SPEED = 900, FLICK_REARM_SPEED = 320, FLICK_GLOW = 480;
 
 function mkStick(hx, hy) {
   return { id: -1, on: false, ox: hx, oy: hy, dx: 1, dy: 0, mag: 0, ang: 0, lastAng: 0, armed: true, hist: [] };
@@ -627,13 +659,17 @@ function resetTouch() {
   mouse.fire = false; mouse.deflect = false;
 }
 function hitC(p, c, r) { return (p.x - c.x) ** 2 + (p.y - c.y) ** 2 <= r * r; }
+// 캔버스에 직접 그리는 HUD 글자 크기: 모바일에서만 키운다(작아 보인다는 피드백 반영).
+function hf(px) { return MODE === 'mobile' ? Math.round(px * 1.3) : px; }
 function nowS() { return (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000; }
 function setStick(s, p, R) {
   const dx = p.x - s.ox, dy = p.y - s.oy, d = Math.hypot(dx, dy);
   s.mag = clamp(d / R, 0, 1);
   if (d > 0.5) { s.ang = Math.atan2(dy, dx); s.dx = dx / d; s.dy = dy / d; }
   const t = nowS();
-  s.hist.push({ x: p.x, y: p.y, t });
+  // 플릭 판정용 이력은 화면상 실제 CSS 픽셀 좌표로 기록한다(캔버스 확대/축소와 무관하게
+  // 항상 같은 물리적 손가락 속도를 기준으로 삼기 위함). cx/cy가 없으면(방어적으로) x/y로 대체.
+  s.hist.push({ x: p.cx !== undefined ? p.cx : p.x, y: p.cy !== undefined ? p.cy : p.y, t });
   while (s.hist.length > 1 && t - s.hist[0].t > FLICK_WINDOW) s.hist.shift();
 }
 // true once when the raw touch point covered real distance FAST within a short
@@ -1325,7 +1361,7 @@ $('volSens').oninput = e => { OPT.sens = +e.target.value; $('volSensVal').textCo
 function applyMode() {
   const mob = MODE === 'mobile';
   const iph = mob && OPT.dev === 'iphone';
-  if (document.body && document.body.classList) document.body.classList.toggle('iphone', iph);
+  if (document.body && document.body.classList) { document.body.classList.toggle('iphone', iph); document.body.classList.toggle('mobile', mob); }
   layoutTouch(iph);
   resize();
   $('devLabel').textContent = iph ? '아이폰' : '기타';
@@ -1953,7 +1989,7 @@ function padBtn(c, label, prog, col, ready) {
   ctx.beginPath(); ctx.arc(c.x, c.y, BTN_R, 0, TAU); ctx.stroke();
   ringGauge(c.x, c.y, BTN_R + 7, prog, col, 5);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = '800 13px "Pretendard","Malgun Gothic",sans-serif';
+  ctx.font = '800 ' + hf(13) + 'px "Pretendard","Malgun Gothic",sans-serif';
   ctx.fillStyle = ready ? col : 'rgba(140,175,205,.5)';
   ctx.fillText(label, c.x, c.y);
 }
@@ -2024,7 +2060,7 @@ function drawTouchUI() {
   ctx.beginPath(); ctx.arc(ULT_C.x, ULT_C.y, ULT_R, 0, TAU); ctx.stroke();
   ringGauge(ULT_C.x, ULT_C.y, ULT_R + 8, act ? P.odT / 5 : P.od / 100, act ? '#ff8a3d' : '#ffd469', 6);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = '900 17px "Pretendard","Malgun Gothic",sans-serif';
+  ctx.font = '900 ' + hf(17) + 'px "Pretendard","Malgun Gothic",sans-serif';
   ctx.fillStyle = full ? '#ffd469' : act ? '#ff8a3d' : 'rgba(140,175,205,.5)';
   ctx.fillText('궁', ULT_C.x, ULT_C.y);
 
@@ -2044,7 +2080,7 @@ function drawHUD() {
   const MB = MODE === 'mobile';
   // cores
   ctx.textAlign = 'left';
-  ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
+  ctx.font = '700 ' + hf(10) + 'px "SFMono-Regular",Consolas,monospace';
   const hpX = MB ? PAD + 78 : PAD + 4;
   ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.fillText('체력', hpX, PAD + 20);
   for (let i = 0; i < P.maxhp; i++) {
@@ -2059,36 +2095,36 @@ function drawHUD() {
   // overdrive + dash bars (PC only; mobile shows them on the touch buttons)
   if (!MB) {
   const odw = 190;
-  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
+  ctx.fillStyle = 'rgba(140,180,215,.7)'; ctx.font = '700 ' + hf(10) + 'px "SFMono-Regular",Consolas,monospace';
   ctx.fillText('궁극기', PAD + 4, H - PAD - 30);
   if (P.odT > 0) bar(PAD + 4, H - PAD - 24, odw, 9, P.odT / 5, '#ffe08a', '#ff8a3d');
   else bar(PAD + 4, H - PAD - 24, odw, 9, P.od / 100, '#3fa8ff', '#7ff0ff');
   if (P.od >= 100 && P.odT <= 0) {
     const pl = 0.6 + Math.sin(G.t * 9) * 0.4;
-    ctx.fillStyle = 'rgba(255,214,120,' + pl + ')'; ctx.font = '900 12px "SFMono-Regular",Consolas,monospace';
+    ctx.fillStyle = 'rgba(255,214,120,' + pl + ')'; ctx.font = '900 ' + hf(12) + 'px "SFMono-Regular",Consolas,monospace';
     ctx.fillText('[ Q ] READY', PAD + 4 + odw + 12, H - PAD - 15);
   }
   // dash
-  ctx.fillStyle = 'rgba(140,180,215,.55)'; ctx.font = '700 9px "SFMono-Regular",Consolas,monospace';
+  ctx.fillStyle = 'rgba(140,180,215,.55)'; ctx.font = '700 ' + hf(9) + 'px "SFMono-Regular",Consolas,monospace';
   ctx.fillText('DASH', PAD + 4, H - PAD - 46);
   bar(PAD + 40, H - PAD - 54, 80, 5, 1 - P.dashCD / P.dashCDMax, '#a78bfa', '#e0d0ff');
   }
 
   // score
   ctx.textAlign = 'right';
-  ctx.font = '900 34px "SFMono-Regular",Consolas,monospace';
+  ctx.font = '900 ' + hf(34) + 'px "SFMono-Regular",Consolas,monospace';
   ctx.fillStyle = '#eaf6ff';
   ctx.fillText(G.score.toLocaleString(), W - PAD - 4, PAD + 36);
-  ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
+  ctx.font = '700 ' + hf(10) + 'px "SFMono-Regular",Consolas,monospace';
   ctx.fillStyle = 'rgba(140,180,215,.7)';
   ctx.fillText('SCORE  ·  BEST ' + G.best.toLocaleString(), W - PAD - 4, PAD + 52);
 
   // wave
   ctx.textAlign = 'center';
-  ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
+  ctx.font = '700 ' + hf(10) + 'px "SFMono-Regular",Consolas,monospace';
   ctx.fillStyle = 'rgba(140,180,215,.7)';
   ctx.fillText(G.phase === 'fight' ? '남은 적 ' + (enemies.length + spawns.length) : '다음 웨이브', W / 2, PAD + 20);
-  ctx.font = '900 22px "Helvetica Neue",Arial,sans-serif';
+  ctx.font = '900 ' + hf(22) + 'px "Helvetica Neue",Arial,sans-serif';
   ctx.fillStyle = '#cfe9ff';
   ctx.fillText('WAVE ' + G.wave, W / 2, PAD + 44);
 
@@ -2099,10 +2135,10 @@ function drawHUD() {
     const cbX = MB ? W / 2 : W - PAD - 60, cbY = MB ? PAD + 118 : H / 2;
     ctx.save(); ctx.translate(cbX, cbY); ctx.scale(pop, pop);
     ctx.textAlign = 'center';
-    ctx.font = '900 46px "Helvetica Neue",Arial,sans-serif';
+    ctx.font = '900 ' + hf(46) + 'px "Helvetica Neue",Arial,sans-serif';
     ctx.fillStyle = 'rgba(255,214,120,' + (0.35 + a * 0.65) + ')';
     ctx.fillText(G.combo + '', 0, 0);
-    ctx.font = '700 11px "SFMono-Regular",Consolas,monospace';
+    ctx.font = '700 ' + hf(11) + 'px "SFMono-Regular",Consolas,monospace';
     ctx.fillStyle = 'rgba(255,214,120,' + (0.3 + a * 0.5) + ')';
     ctx.fillText('COMBO  x' + comboMult().toFixed(2), 0, 20);
     ctx.restore();
@@ -2118,7 +2154,7 @@ function drawHUD() {
     if (!bossGrad) { bossGrad = ctx.createLinearGradient(bx, 0, bx + bw, 0); bossGrad.addColorStop(0, '#ff3b6b'); bossGrad.addColorStop(1, '#ff9a4d'); }
     ctx.fillStyle = bossGrad; ctx.fillRect(bx, by, bw * r, 12);
     ctx.strokeStyle = 'rgba(255,140,160,.6)'; ctx.lineWidth = 1; ctx.strokeRect(bx + .5, by + .5, bw - 1, 11);
-    ctx.textAlign = 'center'; ctx.font = '700 10px "SFMono-Regular",Consolas,monospace';
+    ctx.textAlign = 'center'; ctx.font = '700 ' + hf(10) + 'px "SFMono-Regular",Consolas,monospace';
     ctx.fillStyle = 'rgba(255,190,200,.9)'; ctx.fillText('SENTINEL  ' + Math.ceil(boss.hp), W / 2, by - 5);
   }
 
