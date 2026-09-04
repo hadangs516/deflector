@@ -7,7 +7,10 @@
 <meta property="og:url" content="https://hadangs516.github.io/deflector/">
 <link rel="icon" type="image/png" href="favicon.png">
 <meta property="og:image" content="https://hadangs516.github.io/deflector/og-image.png">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DEFLECTOR — 반사 아레나</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -118,11 +121,34 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 #btnModeChange{position:absolute;top:12px;right:14px;padding:8px 15px;font-size:10px;letter-spacing:.16em;
   color:#7c93ad;background:rgba(8,14,26,.8);border:1px solid rgba(120,190,240,.22);cursor:pointer;z-index:5}
 #btnModeChange:hover{color:#7fd8ff;border-color:#7fd8ff}
+#verTag{position:absolute;right:8px;bottom:6px;font-size:9px;letter-spacing:.08em;color:rgba(140,175,205,.4);
+  pointer-events:none;z-index:6}
 @media (max-width:620px){.keys{grid-template-columns:1fr 1fr}}
 
 .modeCard.diffCard{width:clamp(94px,12vw,148px);text-align:center;padding:clamp(20px,2.6vw,34px) 10px}
 .modeCard.diffCard .ic{font-size:clamp(34px,4.6vw,56px);font-weight:900}
+.modeCard.diffCard .tag2{margin-top:8px;font-size:9px;letter-spacing:.05em;color:#ffd469}
 .rng{flex:0 0 auto;width:clamp(96px,17vw,150px);accent-color:#5ce1ff;background:transparent}
+
+.rankBox{margin-top:22px;width:min(460px,90vw);max-height:52vh;overflow-y:auto;
+  border:1px solid rgba(120,190,240,.18);text-align:left}
+.rankRow{display:grid;grid-template-columns:32px 1fr auto auto;gap:10px;align-items:center;
+  padding:9px 14px;border-bottom:1px solid rgba(120,190,240,.12);font-size:clamp(11px,1.3vw,14px)}
+.rankRow:last-child{border-bottom:0}
+.rankRow .rk{color:#5ce1ff;font-weight:800;text-align:center}
+.rankRow:nth-child(1) .rk{color:#ffd469}
+.rankRow:nth-child(2) .rk{color:#dfe8f2}
+.rankRow:nth-child(3) .rk{color:#e2a765}
+.rankRow .rn{color:#eaf4ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rankRow .rs{color:#ffd469;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace}
+.rankRow .rw{color:#7c93ad;font-size:11px}
+.rankMsg{padding:30px 10px;color:#7c93ad;font-size:12px;text-align:center}
+
+.nickInput{margin-top:22px;width:min(320px,80vw);padding:13px 16px;font-size:15px;letter-spacing:.02em;
+  background:rgba(10,20,34,.85);border:1px solid rgba(120,190,240,.35);color:#eaf4ff;text-align:center;outline:none}
+.nickInput:focus{border-color:#5ce1ff}
+.nickBtns{margin-top:18px;display:flex;gap:10px;justify-content:center}
+.nickBtns .btn{margin-top:0}
 
 /* 아이폰: 주소창/제스처 바를 피해 화면을 줄이고 아래쪽으로 붙인다 */
 body.iphone #wrap{align-items:flex-end}
@@ -158,6 +184,8 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
   .modeRow{margin-top:14px;gap:10px}
   .modeCard{padding:14px 12px}
   .modeCard.diffCard{padding:16px 10px}
+  .rankBox{margin-top:10px;max-height:38vh}
+  .nickInput{margin-top:10px}
   .tutPanel{margin-top:2vh;padding:12px}
   .tutBtns{margin-top:10px}
   #tutSkip{top:8px;right:10px;padding:7px 13px;font-size:10px}
@@ -202,6 +230,7 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
       <div class="krow"><span>M</span><span>음소거</span></div>
     </div>
     <button class="btn" id="btnStart">시작하기</button>
+    <button class="btn ghost" id="btnRankOpenTitle">랭킹 보기</button>
     <div class="note">최고 기록 <span class="mono" id="bestTitle">0</span><span id="noteTail"> · 키보드와 마우스가 필요합니다</span></div>
     <div class="note" id="iosHint" style="display:none">아이폰에서 주소창까지 완전히 없애려면, 공유 버튼 → "홈 화면에 추가" 후 아이콘으로 실행하세요</div>
   </div>
@@ -237,6 +266,12 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
         <input type="range" min="0" max="100" step="5" class="rng" id="volSfx"></div>
       <div class="setRow"><div class="lb">배경음악<small><span id="volMusVal">50</span> / 100</small></div>
         <input type="range" min="0" max="100" step="5" class="rng" id="volMus"></div>
+      <div class="setRow"><div class="lb">닉네임<small><span id="nickLabel">미설정</span> · 이미 등록된 기록의 닉네임은 바뀌지 않습니다</small></div>
+        <button class="miniBtn" id="btnNickChangeBtn">변경</button></div>
+      <div class="setRow"><div class="lb">랭킹<small>상 난이도 기록 상위 10명</small></div>
+        <button class="miniBtn" id="btnRankOpenPause">보기</button></div>
+      <div class="setRow mob"><div class="lb">이동 감도<small><span id="volSensVal">50</span> / 100 · 낮출수록 조금만 밀어도 최고속도로 안 붙습니다</small></div>
+        <input type="range" min="10" max="100" step="5" class="rng" id="volSens"></div>
       <div class="setRow mob"><div class="lb">기기 종류<small><span id="devLabel">기타</span></small></div>
         <button class="miniBtn" id="btnDevAgain">변경</button></div>
       <div class="setRow mob"><div class="lb">대시를 이동 스틱에 합치기<small>끄면 오른쪽에 대시 버튼이 생깁니다</small></div>
@@ -277,10 +312,30 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
     </div>
     <button class="btn" id="btnRetry">다시 하기</button>
     <button class="btn ghost" id="btnHome">메인 화면으로</button>
+    <button class="btn ghost" id="btnRankOpenOver">랭킹 보기</button>
     <div class="note">R 키로도 재시작 · 난이도 <span id="oDiff">상</span></div>
   </div>
 
+  <div class="ov" id="ovRank">
+    <div class="eyebrow">Leaderboard · 상 난이도</div>
+    <div class="hd">랭킹</div>
+    <div class="rankBox" id="rankList"><div class="rankMsg">불러오는 중…</div></div>
+    <button class="btn ghost" id="btnRankClose">닫기</button>
+  </div>
+
+  <div class="ov" id="ovNick">
+    <div class="eyebrow">Leaderboard · 상 난이도</div>
+    <div class="hd">닉네임 등록</div>
+    <div class="tagline">랭킹에 표시될 닉네임을 입력해주세요.<br>최대 10자, 설정에서 언제든 바꿀 수 있습니다. 단, 이미 등록된 기록의 닉네임은 그대로 남습니다.</div>
+    <input type="text" id="nickInput" maxlength="10" class="nickInput" placeholder="닉네임" autocomplete="off">
+    <div class="nickBtns">
+      <button class="btn ghost" id="btnNickCancel">취소</button>
+      <button class="btn" id="btnNickOk">확인</button>
+    </div>
+  </div>
+
   <div id="toast"></div>
+  <div id="verTag" class="mono"></div>
 </div></div>
 
 <script>
@@ -467,6 +522,20 @@ function musicTick() {
   }
 }
 
+// ---------- version ----------
+// 매 업데이트마다 여기 한 줄씩 추가하고 VERSION만 최신 걸로 올린다.
+// Major: 근본적인 구조 변경 / Minor: 새 기능 추가 / Patch: 수정·조정
+const CHANGELOG = [
+  ['1.0.0', '최초 완성작 — 웨이브, 보스, 업그레이드 카드, 절차적 오디오, PC 조작'],
+  ['1.0.1', '용어 표준화 — 코어→체력, 방벽→배리어, 재사용 대기→쿨타임, 오버드라이브→궁극기'],
+  ['1.0.2', '모바일 주소창 가림 수정 — 100dvh, 전체화면 API, 아이폰 안내문'],
+  ['1.1.0', '모바일 조작 추가 — 듀얼 스틱, 플릭 대시/배리어, 궁극기 게이지, 모드 선택, 설정, 튜토리얼'],
+  ['1.2.0', '난이도 선택, 메인 화면 버튼 추가'],
+  ['1.3.0', '아이폰 확인창, 안드로이드 전용 전체화면, 효과음/음악 개별 볼륨, 성능 최적화'],
+  ['1.4.0', '이동 감도 설정, 플릭 판정을 실거리 기반으로 재설계, 저장소를 localStorage로 교체(버그 수정), 버전 표기 추가']
+];
+const VERSION = CHANGELOG[CHANGELOG.length - 1][0];
+
 // ---------- input ----------
 const keys = Object.create(null);
 const mouse = { x: W / 2, y: H / 2, fire: false, deflect: false };
@@ -492,7 +561,28 @@ const DIFFS = [
   { id: 'norm', n: '중', v: 0.75, s: '적의 수, 체력, 발사 빈도가 75%로 줄어듭니다.' },
   { id: 'easy', n: '하', v: 0.50, s: '적의 수, 체력, 발사 빈도가 절반입니다. 처음이라면 여기부터.' }
 ];
-const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true, diff: 1, dev: '', volSfx: 50, volMus: 50 };
+const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true, diff: 1, dev: '', volSfx: 50, volMus: 50, sens: 50, nick: '' };
+// ---------- ranking (Google Apps Script, JSONP — no server, no CORS needed) ----------
+const RANK_URL = 'https://script.google.com/macros/s/AKfycbwACqaSIhK6k4cgdXY22QrrZKFv_2Q_0zaZgM3f3-gRhAMsif8QJ_A5-a3V7SolFyUiuw/exec';
+let rankSeq = 0;
+function rankJSONP(params, cb, timeoutMs) {
+  const id = '__rankCb' + (rankSeq++) + '_' + Date.now();
+  let done = false;
+  const script = document.createElement('script');
+  const cleanup = () => { window[id] = undefined; try { delete window[id]; } catch (e) { } if (script.parentNode) script.parentNode.removeChild(script); };
+  window[id] = (data) => { if (done) return; done = true; cleanup(); cb(null, data); };
+  script.onerror = () => { if (done) return; done = true; cleanup(); cb(new Error('network')); };
+  const qs = Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&');
+  script.src = RANK_URL + '?' + qs + (qs ? '&' : '') + 'callback=' + id;
+  document.head.appendChild(script);
+  setTimeout(() => { if (!done) { done = true; cleanup(); cb(new Error('timeout')); } }, timeoutMs || 7000);
+}
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function diffIsHard() { return DIFF === 1; }
+function submitScore(nick, score, wave) {
+  rankJSONP({ action: 'submit', nick, score, wave }, (err) => { toast(err ? '랭킹 등록 실패 (인터넷 연결 확인)' : '랭킹에 등록했습니다'); });
+}
+function fetchRank(cb) { rankJSONP({}, cb); }
 const UA = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
 const IS_ANDROID = /android/i.test(UA);
 const IS_IPHONE = /iphone|ipod/i.test(UA);
@@ -525,33 +615,49 @@ function layoutTouch(iph) {
     DASH_C = { x: W - 202, y: H - 310 };
   }
 }
-const BARRIER_TRIG = 0.90, FLICK_RATE = 2.2;
+const FLICK_WINDOW = 0.12, FLICK_SPEED = 440, FLICK_REARM_SPEED = 170, FLICK_GLOW = 300;
 
 function mkStick(hx, hy) {
-  return { id: -1, on: false, ox: hx, oy: hy, dx: 1, dy: 0, mag: 0, pmag: 0, ang: 0, lastAng: 0, armed: false };
+  return { id: -1, on: false, ox: hx, oy: hy, dx: 1, dy: 0, mag: 0, ang: 0, lastAng: 0, armed: true, hist: [] };
 }
 const TC = { move: mkStick(MOVE_HOME.x, MOVE_HOME.y), aim: mkStick(AIM_C.x, AIM_C.y) };
 function resetTouch() {
-  for (const k of ['move', 'aim']) { const s = TC[k]; s.id = -1; s.on = false; s.mag = 0; s.pmag = 0; s.armed = true; }
+  for (const k of ['move', 'aim']) { const s = TC[k]; s.id = -1; s.on = false; s.mag = 0; s.armed = true; s.hist.length = 0; }
   TC.move.ox = MOVE_HOME.x; TC.move.oy = MOVE_HOME.y;
   mouse.fire = false; mouse.deflect = false;
 }
 function hitC(p, c, r) { return (p.x - c.x) ** 2 + (p.y - c.y) ** 2 <= r * r; }
+function nowS() { return (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000; }
 function setStick(s, p, R) {
   const dx = p.x - s.ox, dy = p.y - s.oy, d = Math.hypot(dx, dy);
   s.mag = clamp(d / R, 0, 1);
   if (d > 0.5) { s.ang = Math.atan2(dy, dx); s.dx = dx / d; s.dy = dy / d; }
+  const t = nowS();
+  s.hist.push({ x: p.x, y: p.y, t });
+  while (s.hist.length > 1 && t - s.hist[0].t > FLICK_WINDOW) s.hist.shift();
 }
-// true once when the stick is pushed outward past the threshold FAST enough.
-// Rate-based so it works whether the stick was centered or already half-pushed.
-function stickFlick(s, rdt) {
-  const rise = (s.mag - s.pmag) / Math.max(rdt, 1 / 240);
-  s.pmag = s.mag;
-  if (s.mag < BARRIER_TRIG) { s.armed = true; return false; }
-  if (s.armed) { s.armed = false; return rise >= FLICK_RATE; }
+// true once when the raw touch point covered real distance FAST within a short
+// window — independent of the stick's own (small) visual radius, so a big thumb
+// resting or slowly repositioning on a small stick never triggers it.
+function stickFlick(s) {
+  if (s.hist.length < 2) return false;
+  const a = s.hist[0], b = s.hist[s.hist.length - 1];
+  const dt = Math.max(b.t - a.t, 1 / 240);
+  const speed = Math.hypot(b.x - a.x, b.y - a.y) / dt;
+  if (speed < FLICK_REARM_SPEED) s.armed = true;
+  if (s.armed && speed >= FLICK_SPEED) {
+    s.armed = false;
+    s.flickAng = Math.atan2(b.y - a.y, b.x - a.x);
+    return true;
+  }
   return false;
 }
 function moveAng() { return (TC.move.on && TC.move.mag > 0.14) ? TC.move.ang : TC.move.lastAng; }
+function stickSpeed(s) {
+  if (s.hist.length < 2) return 0;
+  const a = s.hist[0], b = s.hist[s.hist.length - 1];
+  return Math.hypot(b.x - a.x, b.y - a.y) / Math.max(b.t - a.t, 1 / 240);
+}
 function showDashBtn() { return MODE === 'mobile' && !OPT.mergeDash; }
 function showBarBtn() { return MODE === 'mobile' && !OPT.mergeBarrier; }
 
@@ -580,18 +686,18 @@ cv.addEventListener('pointerdown', e => {
     TC.aim.id = e.pointerId; TC.aim.on = true;
     TC.aim.ox = AIM_C.x; TC.aim.oy = AIM_C.y;
     setStick(TC.aim, p, AIM_R);
-    TC.aim.pmag = TC.aim.mag; TC.aim.armed = TC.aim.mag < BARRIER_TRIG;
+    TC.aim.hist.length = 0; setStick(TC.aim, p, AIM_R); TC.aim.armed = true;
   } else {
     if (TC.move.id !== -1) return;
     TC.move.id = e.pointerId; TC.move.on = true;
     TC.move.ox = p.x; TC.move.oy = p.y;
-    TC.move.mag = 0; TC.move.pmag = 0; TC.move.armed = true;
+    TC.move.mag = 0; TC.move.armed = true; TC.move.hist.length = 0;
   }
 });
 function releaseTouch(e) {
   if (MODE !== 'mobile') { if (e.button === 2) mouse.deflect = false; else mouse.fire = false; return; }
-  if (TC.move.id === e.pointerId) { TC.move.id = -1; TC.move.on = false; TC.move.mag = 0; TC.move.pmag = 0; TC.move.armed = true; }
-  else if (TC.aim.id === e.pointerId) { TC.aim.id = -1; TC.aim.on = false; TC.aim.mag = 0; TC.aim.pmag = 0; TC.aim.armed = true; }
+  if (TC.move.id === e.pointerId) { TC.move.id = -1; TC.move.on = false; TC.move.mag = 0; TC.move.armed = true; TC.move.hist.length = 0; }
+  else if (TC.aim.id === e.pointerId) { TC.aim.id = -1; TC.aim.on = false; TC.aim.mag = 0; TC.aim.armed = true; TC.aim.hist.length = 0; }
 }
 cv.addEventListener('pointerup', releaseTouch);
 cv.addEventListener('pointercancel', e => { if (MODE === 'mobile') releaseTouch(e); else { mouse.fire = false; mouse.deflect = false; } });
@@ -745,7 +851,8 @@ function updatePlayer(dt) {
     // left stick: analog movement
     if (TC.move.on && TC.move.mag > 0.14) {
       ax = TC.move.dx; ay = TC.move.dy;
-      magScale = clamp((TC.move.mag - 0.14) / 0.66, 0.25, 1);
+      const sensK = clamp(OPT.sens / 50, 0.35, 2.2); // 50 = 지금까지 느낌 그대로
+      magScale = clamp((TC.move.mag * sensK - 0.14) / 0.66, 0.25, 1);
       TC.move.lastAng = TC.move.ang;
     }
     // flick gestures (both sticks tracked every frame to keep state consistent)
@@ -1182,7 +1289,8 @@ function openUpgrade() {
 const ovTitle = document.getElementById('ovTitle'), ovUp = document.getElementById('ovUp'),
   ovPause = document.getElementById('ovPause'), ovOver = document.getElementById('ovOver'),
   ovMode = document.getElementById('ovMode'), ovTut = document.getElementById('ovTut'),
-  ovDiff = document.getElementById('ovDiff'), ovDev = document.getElementById('ovDev');
+  ovDiff = document.getElementById('ovDiff'), ovDev = document.getElementById('ovDev'),
+  ovRank = document.getElementById('ovRank'), ovNick = document.getElementById('ovNick');
 const $ = id => document.getElementById(id);
 const toastEl = document.getElementById('toast');
 let toastT = 0;
@@ -1207,9 +1315,11 @@ function applyVolumes() {
 function syncVolUI() {
   $('volSfx').value = OPT.volSfx; $('volSfxVal').textContent = OPT.volSfx;
   $('volMus').value = OPT.volMus; $('volMusVal').textContent = OPT.volMus;
+  $('volSens').value = OPT.sens; $('volSensVal').textContent = OPT.sens;
 }
 $('volSfx').oninput = e => { OPT.volSfx = +e.target.value; $('volSfxVal').textContent = OPT.volSfx; applyVolumes(); savePrefs(); };
 $('volMus').oninput = e => { OPT.volMus = +e.target.value; $('volMusVal').textContent = OPT.volMus; applyVolumes(); savePrefs(); };
+$('volSens').oninput = e => { OPT.sens = +e.target.value; $('volSensVal').textContent = OPT.sens; savePrefs(); };
 
 // ---------- mode / prefs ----------
 function applyMode() {
@@ -1232,27 +1342,22 @@ function applyMode() {
   cv.style.cursor = mob ? 'default' : 'crosshair';
   resetTouch();
 }
-async function loadPrefs() {
+function loadPrefs() {
   try {
-    if (window.storage) {
-      const m = await window.storage.get('deflector:mode');
-      if (m && m.value === 'pc') MODE = 'pc';
-      else if (m && m.value === 'mobile') MODE = 'mobile';
-      const o = await window.storage.get('deflector:opt');
-      if (o && o.value) Object.assign(OPT, JSON.parse(o.value));
-    }
+    const m = localStorage.getItem('deflector:mode');
+    if (m === 'pc') MODE = 'pc'; else if (m === 'mobile') MODE = 'mobile';
+    const o = localStorage.getItem('deflector:opt');
+    if (o) Object.assign(OPT, JSON.parse(o));
   } catch (e) { }
   A.muted = !OPT.sound;
   if (DIFFS.some(d => d.v === OPT.diff)) DIFF = OPT.diff;
-  syncVolUI(); applyVolumes();
+  syncVolUI(); syncNickUI(); applyVolumes();
   applyMode();
 }
-async function savePrefs() {
+function savePrefs() {
   try {
-    if (window.storage) {
-      await window.storage.set('deflector:mode', MODE || '');
-      await window.storage.set('deflector:opt', JSON.stringify(OPT));
-    }
+    localStorage.setItem('deflector:mode', MODE || '');
+    localStorage.setItem('deflector:opt', JSON.stringify(OPT));
   } catch (e) { }
 }
 function diffName() { const d = DIFFS.find(x => x.v === DIFF); return d ? d.n : '상'; }
@@ -1260,13 +1365,14 @@ function buildDiffCards() {
   const row = $('diffRow'); row.innerHTML = '';
   DIFFS.forEach(d => {
     const el = document.createElement('div');
-    el.className = 'modeCard';
     el.className = 'modeCard diffCard';
-    el.innerHTML = '<div class="ic">' + d.n + '</div>';
+    el.innerHTML = '<div class="ic">' + d.n + '</div>' + (d.id === 'hard' ? '<div class="tag2">랭킹 기능 있음</div>' : '');
     el.onclick = () => {
       DIFF = d.v; OPT.diff = d.v; savePrefs();
       ovDiff.classList.remove('on');
-      if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun();
+      const proceed = () => { if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun(); };
+      if (d.id === 'hard' && !OPT.nick) openNick(proceed, () => { openDiff(); });
+      else proceed();
     };
     row.appendChild(el);
   });
@@ -1280,10 +1386,68 @@ function goHome() {
   G.state = 'title'; resetTouch();
   ovOver.classList.remove('on'); ovPause.classList.remove('on');
   ovUp.classList.remove('on'); ovDiff.classList.remove('on'); ovTut.classList.remove('on');
+  ovRank.classList.remove('on'); ovNick.classList.remove('on');
   $('tutMark').className = '';
   ovTitle.classList.add('on');
   A.intensity = 1; applyVolumes();
 }
+
+// ---------- ranking overlay ----------
+let rankFrom = 'title';
+function openRank(from) {
+  rankFrom = from;
+  if (from === 'title') ovTitle.classList.remove('on');
+  else if (from === 'over') ovOver.classList.remove('on');
+  ovRank.classList.add('on');
+  $('rankList').innerHTML = '<div class="rankMsg">불러오는 중…</div>';
+  fetchRank((err, data) => {
+    if (!ovRank.classList.contains('on')) return; // 닫은 뒤 도착한 응답은 무시
+    if (err || !Array.isArray(data)) { $('rankList').innerHTML = '<div class="rankMsg">순위를 불러오지 못했습니다.</div>'; return; }
+    if (!data.length) { $('rankList').innerHTML = '<div class="rankMsg">아직 등록된 기록이 없습니다.</div>'; return; }
+    $('rankList').innerHTML = data.slice(0, 10).map((r, i) =>
+      '<div class="rankRow"><span class="rk">' + (i + 1) + '</span><span class="rn">' + escHtml(r.nick || '???') +
+      '</span><span class="rs">' + (Number(r.score) || 0).toLocaleString() + '</span><span class="rw">W' + (Number(r.wave) || 0) + '</span></div>'
+    ).join('');
+  });
+}
+function closeRank() {
+  ovRank.classList.remove('on');
+  if (rankFrom === 'title') ovTitle.classList.add('on');
+  else if (rankFrom === 'over') ovOver.classList.add('on');
+  else if (rankFrom === 'pause') ovPause.classList.add('on');
+}
+$('btnRankClose').onclick = closeRank;
+$('btnRankOpenTitle').onclick = () => openRank('title');
+$('btnRankOpenOver').onclick = () => openRank('over');
+$('btnRankOpenPause').onclick = () => { ovPause.classList.remove('on'); openRank('pause'); };
+
+// ---------- nickname overlay ----------
+let nickOnOk = null, nickOnCancel = null;
+function openNick(onOk, onCancel) {
+  nickOnOk = onOk || null; nickOnCancel = onCancel || onOk || null;
+  $('nickInput').value = OPT.nick || '';
+  ovNick.classList.add('on');
+  setTimeout(() => $('nickInput').focus(), 30);
+}
+function syncNickUI() { $('nickLabel').textContent = OPT.nick || '미설정'; }
+$('btnNickOk').onclick = () => {
+  const v = $('nickInput').value.trim().slice(0, 10);
+  if (!v) { $('nickInput').focus(); return; }
+  OPT.nick = v; savePrefs(); syncNickUI();
+  ovNick.classList.remove('on');
+  const fn = nickOnOk; nickOnOk = nickOnCancel = null;
+  if (fn) fn();
+};
+$('btnNickCancel').onclick = () => {
+  ovNick.classList.remove('on');
+  const fn = nickOnCancel; nickOnOk = nickOnCancel = null;
+  if (fn) fn();
+};
+$('nickInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnNickOk').onclick(); });
+$('btnNickChangeBtn').onclick = () => {
+  ovPause.classList.remove('on');
+  openNick(() => { ovPause.classList.add('on'); }, () => { ovPause.classList.add('on'); });
+};
 $('btnDiffBack').onclick = () => { ovDiff.classList.remove('on'); ovTitle.classList.add('on'); };
 $('btnHome').onclick = goHome;
 function devBtn(label, fn) {
@@ -1338,10 +1502,10 @@ function tutSteps() {
     { t: '이동', b: '화면 <b>왼쪽 아래 아무 곳</b>이나 손가락을 대면 그 자리에 조이스틱이 생깁니다. 손을 떼고 다시 대면 그 위치로 옮겨집니다.<br>미는 정도에 비례해서 속도가 빨라집니다.', p: [MOVE_HOME.x, MOVE_HOME.y], r: 230 },
     { t: '조준과 사격', b: '오른쪽 스틱은 <b>자리가 고정</b>되어 있습니다. 살짝만 밀어도 그 방향으로 <b>자동 발사</b>됩니다. 따로 공격 버튼을 누를 필요는 없습니다.', p: [AIM_C.x, AIM_C.y], r: 215 },
     OPT.mergeBarrier
-      ? { t: '배리어', b: '오른쪽 스틱을 <b>바깥쪽 점선까지 빠르게 튕기면</b> 그 방향으로 배리어가 펼쳐집니다. 천천히 끝까지 밀면 발동하지 않습니다.<br>펼친 직후 짧은 순간에 막으면 <b>PERFECT</b>가 터지고, 배리어가 켜져 있는 동안에도 사격은 계속됩니다.', p: [AIM_C.x, AIM_C.y], r: 215 }
+      ? { t: '배리어', b: '오른쪽 스틱을 <b>짧고 빠르게 튕기면</b> 그 방향으로 배리어가 펼쳐집니다. 천천히 움직이면 아무리 멀리 밀어도 발동하지 않습니다.<br>펼친 직후 짧은 순간에 막으면 <b>PERFECT</b>가 터지고, 배리어가 켜져 있는 동안에도 사격은 계속됩니다.', p: [AIM_C.x, AIM_C.y], r: 215 }
       : { t: '배리어', b: '<b>배리어 버튼</b>을 누르면 현재 이동 방향으로 배리어가 펼쳐집니다.<br>펼친 직후 짧은 순간에 막으면 <b>PERFECT</b>가 터지고, 배리어가 켜져 있는 동안에도 사격은 계속됩니다.', p: [BAR_C.x, BAR_C.y], r: 120 },
     OPT.mergeDash
-      ? { t: '대시', b: '왼쪽 스틱을 <b>바깥쪽까지 빠르게 튕기면</b> 그 방향으로 대시합니다. 대시 중에는 <b>무적</b>입니다.<br>손을 떼지 않아도 되고, 쿨타임 중에 튕기면 그냥 무시됩니다.', p: [MOVE_HOME.x, MOVE_HOME.y], r: 230 }
+      ? { t: '대시', b: '왼쪽 스틱을 <b>짧고 빠르게 튕기면</b> 그 방향으로 대시합니다. 천천히 밀기만 해서는 발동하지 않습니다. 대시 중에는 <b>무적</b>입니다.<br>손을 떼지 않아도 되고, 쿨타임 중에 튕기면 그냥 무시됩니다.', p: [MOVE_HOME.x, MOVE_HOME.y], r: 230 }
       : { t: '대시', b: '<b>대시 버튼</b>을 누르면 현재 이동 방향으로 대시합니다. 대시 중에는 <b>무적</b>입니다.', p: [DASH_C.x, DASH_C.y], r: 120 },
     { t: '궁극기', b: '버튼 테두리 게이지가 <b>한 바퀴</b>를 다 채우면 궁극기를 쓸 수 있습니다. 적을 처치하거나 탄을 반사할 때마다 충전됩니다.<br>왼쪽 위 정지 버튼에서 조작 방식을 바꿀 수 있습니다.', p: [ULT_C.x, ULT_C.y], r: 140 }
   ];
@@ -1410,16 +1574,17 @@ document.getElementById('btnResume').onclick = togglePause;
 document.getElementById('btnQuit').onclick = goHome;
 
 // ---------- best score ----------
-async function loadBest() {
-  try { if (window.storage) { const r = await window.storage.get('deflector:best'); if (r && r.value) G.best = parseInt(r.value) || 0; } } catch (e) { }
+function loadBest() {
+  try { const v = localStorage.getItem('deflector:best'); if (v) G.best = parseInt(v) || 0; } catch (e) { }
   document.getElementById('bestTitle').textContent = G.best.toLocaleString();
 }
-async function saveBest() {
-  try { if (window.storage) await window.storage.set('deflector:best', String(G.best)); } catch (e) { }
+function saveBest() {
+  try { localStorage.setItem('deflector:best', String(G.best)); } catch (e) { }
 }
 loadBest();
 loadPrefs();
 resetPlayer();
+$('verTag').textContent = 'v' + VERSION;
 
 // ---------- run flow ----------
 function startRun() {
@@ -1432,7 +1597,8 @@ function startRun() {
     banner: 'READY', bannerT: 1.4, hitStop: 0, pendingUp: false, slowT: 0, perfFxCD: 0
   });
   ovTitle.classList.remove('on'); ovOver.classList.remove('on'); ovPause.classList.remove('on'); ovUp.classList.remove('on');
-  ovTut.classList.remove('on'); ovDiff.classList.remove('on'); $('tutMark').className = ''; resetTouch();
+  ovTut.classList.remove('on'); ovDiff.classList.remove('on'); ovRank.classList.remove('on'); ovNick.classList.remove('on');
+  $('tutMark').className = ''; resetTouch();
   A.intensity = 1; applyVolumes();
 }
 function gameOver() {
@@ -1451,6 +1617,7 @@ function gameOver() {
   document.getElementById('oCombo').textContent = G.maxCombo;
   document.getElementById('bestTitle').textContent = G.best.toLocaleString();
   $('oDiff').textContent = diffName();
+  if (diffIsHard() && OPT.nick) submitScore(OPT.nick, G.score, G.wave);
   setTimeout(() => { if (G.state === 'over') ovOver.classList.add('on'); }, 850);
 }
 
@@ -1827,22 +1994,20 @@ function drawTouchUI() {
   ctx.globalAlpha = aa; ctx.strokeStyle = '#ffb0c0'; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.arc(AIM_C.x, AIM_C.y, AIM_R, 0, TAU); ctx.stroke();
   ctx.globalAlpha = 1;
-  if (OPT.mergeBarrier) { // barrier threshold marker
+  if (OPT.mergeBarrier) {
     const sr = clamp(1 - P.shieldCD / (P.shieldCDMax + P.shieldDur), 0, 1);
     ringGauge(AIM_C.x, AIM_C.y, AIM_R + 10, sr, sr >= 1 ? 'rgba(255,212,105,.95)' : 'rgba(210,175,90,.45)', 5);
-    ctx.setLineDash([6, 8]);
-    ctx.globalAlpha = a.on ? .55 : .22;
-    ctx.strokeStyle = '#ffd469'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(AIM_C.x, AIM_C.y, AIM_R * BARRIER_TRIG, 0, TAU); ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 1;
   }
+  // 배리어 발동 기준이 스틱 반경이 아니라 실제 튕기는 속도라, 손가락이 빠르게
+  // 움직이는 순간에만 손잡이가 골드로 반짝여서 '지금 튕기면 나간다'는 감각을 준다
+  const aFast = stickSpeed(a) >= FLICK_GLOW;
   const axk = AIM_C.x + a.dx * a.mag * AIM_R, ayk = AIM_C.y + a.dy * a.mag * AIM_R;
   ctx.globalCompositeOperation = 'lighter';
-  glow(a.mag >= BARRIER_TRIG ? 'gold' : 'red', axk, ayk, 42, a.on ? .4 : .12);
+  glow(aFast ? 'gold' : 'red', axk, ayk, 42, a.on ? .4 : .12);
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = a.on ? .95 : .35;
   ctx.fillStyle = 'rgba(46,22,30,.9)';
-  ctx.strokeStyle = a.mag >= BARRIER_TRIG ? '#ffd469' : '#ff9aac'; ctx.lineWidth = 2.5;
+  ctx.strokeStyle = aFast ? '#ffd469' : '#ff9aac'; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.arc(axk, ayk, 32, 0, TAU); ctx.fill(); ctx.stroke();
   ctx.globalAlpha = 1;
 
