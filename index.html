@@ -53,6 +53,7 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 
 .hd{font-size:clamp(26px,4.6vw,58px);font-weight:900;letter-spacing:-.03em}
 .hd.bad{color:#ff5c7a;filter:drop-shadow(0 0 24px rgba(255,60,110,.5))}
+.hd.good{color:#ffd469;filter:drop-shadow(0 0 24px rgba(255,205,90,.5))}
 
 .stats{margin-top:26px;display:grid;grid-template-columns:repeat(3,minmax(92px,1fr));gap:1px;background:rgba(120,190,240,.16);
   border:1px solid rgba(120,190,240,.16);max-width:560px;width:100%}
@@ -331,8 +332,8 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
   </div>
 
   <div class="ov" id="ovOver">
-    <div class="eyebrow">Core Breach</div>
-    <div class="hd bad">격추됨</div>
+    <div class="eyebrow" id="oEyebrow">Core Breach</div>
+    <div class="hd bad" id="oHd">격추됨</div>
     <div class="stats">
       <div class="st"><div class="k">SCORE</div><div class="v mono" id="oScore">0</div></div>
       <div class="st"><div class="k">WAVE</div><div class="v mono" id="oWave">0</div></div>
@@ -355,9 +356,9 @@ body.iphone #stage{width:min(96vw,calc(var(--vh100)*0.80*16/9));
   </div>
 
   <div class="ov" id="ovNick">
-    <div class="eyebrow">Leaderboard · 상 난이도</div>
+    <div class="eyebrow">Player ID</div>
     <div class="hd">닉네임 등록</div>
-    <div class="tagline">랭킹에 표시될 닉네임을 입력해주세요.<br>최대 10자, 설정에서 언제든 바꿀 수 있습니다. 단, 이미 등록된 기록의 닉네임은 그대로 남습니다.</div>
+    <div class="tagline">플레이 기록에 쓸 닉네임을 입력해주세요.<br>최대 10자, 설정에서 언제든 바꿀 수 있습니다. 단, 이미 등록된 상 난이도 랭킹 기록의 닉네임은 그대로 남습니다.</div>
     <input type="text" id="nickInput" maxlength="10" class="nickInput" placeholder="닉네임" autocomplete="off">
     <div class="nickBtns">
       <button class="btn ghost" id="btnNickCancel">취소</button>
@@ -504,6 +505,12 @@ const SFX = {
   wave() { if (!A.started) return; const t = A.ctx.currentTime; [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.20, 'square', 0.09, t + i * 0.075)); },
   card() { tone(880, 0.09, 'square', 0.10, 0, 1320); },
   over() { if (!A.started) return; const t = A.ctx.currentTime; [523, 440, 349, 261].forEach((f, i) => tone(f, 0.42, 'sawtooth', 0.16, t + i * 0.14, f * 0.94)); },
+  clear() {
+    if (!A.started) return; const t = A.ctx.currentTime;
+    [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.5, 'triangle', 0.18, t + i * 0.11, f * 1.02));
+    tone(130, 0.9, 'sine', 0.22, t, 90);
+    noiseHit(0.4, 0.18, t, 1500, 6000);
+  },
   od() {
     if (!A.started) return; const t = A.ctx.currentTime;
     [220, 277, 330, 440, 554].forEach((f, i) => tone(f, 0.8, 'sawtooth', 0.11, t + i * 0.02, f));
@@ -563,7 +570,9 @@ const CHANGELOG = [
   ['1.1.0', '모바일 조작 추가 — 듀얼 스틱, 플릭 대시/배리어, 궁극기 게이지, 모드 선택, 설정, 튜토리얼'],
   ['1.2.0', '난이도 선택, 메인 화면 버튼 추가'],
   ['1.3.0', '아이폰 확인창, 안드로이드 전용 전체화면, 효과음/음악 개별 볼륨, 성능 최적화'],
-  ['1.4.0', '이동 감도 설정, 플릭 판정을 실거리 기반으로 재설계, 저장소를 localStorage로 교체(버그 수정), 버전 표기 추가']
+  ['1.4.0', '이동 감도 설정, 플릭 판정을 실거리 기반으로 재설계, 저장소를 localStorage로 교체(버그 수정), 버전 표기 추가'],
+  ['1.5.0', '기기 종류 표시 버그 수정(아이패드/안드로이드도 실제 선택값으로 표기), 분리형 대시·배리어 버튼에 방향 밀기 입력 추가, 궁극기 사용 중 게이지 충전 중단(무한 사용 버그 수정)'],
+  ['1.6.0', '난이도 무관 닉네임 필수 입력 + 접속 기록 저장(닉네임 기준), 보스 패턴을 등급제로 확장(웨이브가 오를수록 신규 패턴·강화 소환 추가), 50웨이브 최종보스와 게임 클리어 결말 추가, 모바일 궁극기 풀차지 연출 강화']
 ];
 const VERSION = CHANGELOG[CHANGELOG.length - 1][0];
 
@@ -593,6 +602,7 @@ const DIFFS = [
   { id: 'easy', n: '하', v: 0.50, s: '적의 수, 체력, 발사 빈도가 절반입니다. 처음이라면 여기부터.' }
 ];
 const OPT = { mergeDash: true, mergeBarrier: true, tutDone: false, sound: true, diff: 1, dev: '', volSfx: 50, volMus: 50, sens: 50, nick: '' };
+const DEV_LABELS = { iphone: '아이폰', ipad: '아이패드', android: '안드로이드', other: '기타' };
 // ---------- ranking (Google Apps Script, JSONP — no server, no CORS needed) ----------
 const RANK_URL = 'https://script.google.com/macros/s/AKfycbwACqaSIhK6k4cgdXY22QrrZKFv_2Q_0zaZgM3f3-gRhAMsif8QJ_A5-a3V7SolFyUiuw/exec';
 let rankSeq = 0;
@@ -614,6 +624,12 @@ function submitScore(nick, score, wave) {
   rankJSONP({ action: 'submit', nick, score, wave }, (err) => { toast(err ? '랭킹 등록 실패 (인터넷 연결 확인)' : '랭킹에 등록했습니다'); });
 }
 function fetchRank(cb) { rankJSONP({}, cb); }
+// 닉네임 기준으로 "언제, 몇 번" 들어왔는지만 기록한다(IP는 쓰지 않음).
+// 실패해도 플레이에는 영향 없는 백그라운드 기록이라 에러를 화면에 띄우지 않는다.
+function logVisit() {
+  if (!OPT.nick) return;
+  rankJSONP({ action: 'visit', nick: OPT.nick }, () => { });
+}
 const UA = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
 const IS_ANDROID = /android/i.test(UA);
 const IS_IPHONE = /iphone|ipod/i.test(UA);
@@ -653,9 +669,21 @@ function mkStick(hx, hy) {
   return { id: -1, on: false, ox: hx, oy: hy, dx: 1, dy: 0, mag: 0, ang: 0, lastAng: 0, armed: true, hist: [] };
 }
 const TC = { move: mkStick(MOVE_HOME.x, MOVE_HOME.y), aim: mkStick(AIM_C.x, AIM_C.y) };
+// 분리된 대시/배리어 버튼 위에서 손가락을 누른 채 미는 방향을 추적한다.
+// dist가 BTN_DEAD 미만이면(=탭) 이동 방향을 쓰고, 넘으면(=밀기) 그 방향을 쓴다.
+const BTN_DEAD = 16;
+function mkBtnStick() { return { id: -1, on: false, ox: 0, oy: 0, dx: 0, dy: 0, dist: 0 }; }
+const BS = { dash: mkBtnStick(), bar: mkBtnStick() };
+function setBtnStick(s, p) {
+  const dx = p.x - s.ox, dy = p.y - s.oy, d = Math.hypot(dx, dy);
+  s.dist = d;
+  if (d > 0.5) { s.dx = dx / d; s.dy = dy / d; }
+}
 function resetTouch() {
   for (const k of ['move', 'aim']) { const s = TC[k]; s.id = -1; s.on = false; s.mag = 0; s.armed = true; s.hist.length = 0; }
   TC.move.ox = MOVE_HOME.x; TC.move.oy = MOVE_HOME.y;
+  BS.dash.id = -1; BS.dash.on = false; BS.dash.dist = 0;
+  BS.bar.id = -1; BS.bar.on = false; BS.bar.dist = 0;
   mouse.fire = false; mouse.deflect = false;
 }
 function hitC(p, c, r) { return (p.x - c.x) ** 2 + (p.y - c.y) ** 2 <= r * r; }
@@ -702,6 +730,8 @@ cv.addEventListener('pointermove', e => {
   if (MODE !== 'mobile') { mouse.x = p.x; mouse.y = p.y; return; }
   if (TC.move.id === e.pointerId) setStick(TC.move, p, MOVE_R);
   else if (TC.aim.id === e.pointerId) setStick(TC.aim, p, AIM_R);
+  else if (BS.dash.id === e.pointerId) setBtnStick(BS.dash, p);
+  else if (BS.bar.id === e.pointerId) setBtnStick(BS.bar, p);
 });
 cv.addEventListener('pointerdown', e => {
   const p = toPt(e);
@@ -715,8 +745,14 @@ cv.addEventListener('pointerdown', e => {
   if (hitC(p, PAUSE_C, PAUSE_R + 12)) { togglePause(); return; }
   if (G.state !== 'play') return;
   if (hitC(p, ULT_C, ULT_R + 10)) { tryOverdrive(); return; }
-  if (showDashBtn() && hitC(p, DASH_C, BTN_R + 10)) { const a = moveAng(); tryDash(Math.cos(a), Math.sin(a)); return; }
-  if (showBarBtn() && hitC(p, BAR_C, BTN_R + 10)) { tryDeflect(moveAng()); return; }
+  if (showDashBtn() && hitC(p, DASH_C, BTN_R + 10)) {
+    BS.dash.id = e.pointerId; BS.dash.on = true; BS.dash.ox = DASH_C.x; BS.dash.oy = DASH_C.y; BS.dash.dx = 0; BS.dash.dy = 0; BS.dash.dist = 0;
+    return;
+  }
+  if (showBarBtn() && hitC(p, BAR_C, BTN_R + 10)) {
+    BS.bar.id = e.pointerId; BS.bar.on = true; BS.bar.ox = BAR_C.x; BS.bar.oy = BAR_C.y; BS.bar.dx = 0; BS.bar.dy = 0; BS.bar.dist = 0;
+    return;
+  }
   if (p.x > W * 0.5) {
     if (TC.aim.id !== -1) return;
     TC.aim.id = e.pointerId; TC.aim.on = true;
@@ -734,6 +770,16 @@ function releaseTouch(e) {
   if (MODE !== 'mobile') { if (e.button === 2) mouse.deflect = false; else mouse.fire = false; return; }
   if (TC.move.id === e.pointerId) { TC.move.id = -1; TC.move.on = false; TC.move.mag = 0; TC.move.armed = true; TC.move.hist.length = 0; }
   else if (TC.aim.id === e.pointerId) { TC.aim.id = -1; TC.aim.on = false; TC.aim.mag = 0; TC.aim.armed = true; TC.aim.hist.length = 0; }
+  else if (BS.dash.id === e.pointerId) {
+    const a = BS.dash.dist >= BTN_DEAD ? Math.atan2(BS.dash.dy, BS.dash.dx) : moveAng();
+    BS.dash.id = -1; BS.dash.on = false; BS.dash.dist = 0;
+    tryDash(Math.cos(a), Math.sin(a));
+  }
+  else if (BS.bar.id === e.pointerId) {
+    const a = BS.bar.dist >= BTN_DEAD ? Math.atan2(BS.bar.dy, BS.bar.dx) : moveAng();
+    BS.bar.id = -1; BS.bar.on = false; BS.bar.dist = 0;
+    tryDeflect(a);
+  }
 }
 cv.addEventListener('pointerup', releaseTouch);
 cv.addEventListener('pointercancel', e => { if (MODE === 'mobile') releaseTouch(e); else { mouse.fire = false; mouse.deflect = false; } });
@@ -853,6 +899,10 @@ function tryDeflect(lockAng) {
   P.shieldLock = (lockAng === undefined) ? null : lockAng;
 }
 function shAng() { return P.shieldLock === null ? P.ang : P.shieldLock; }
+// 궁극기 사용 중(P.odT > 0)에는 게이지가 차지 않는다.
+// 예전에는 사용 중에도 처치·반사로 게이지가 계속 올라가서, 카드 조합에 따라
+// 궁극기가 끝나기도 전에 이미 다음 궁극기가 준비되는 문제가 있었다.
+function gainOD(n) { if (P.odT <= 0) P.od = clamp(P.od + n * P.odGain, 0, 100); }
 function tryOverdrive() {
   if (G.state !== 'play' || P.odT > 0 || P.od < 100) return;
   P.od = 0; P.odT = 5.0;
@@ -955,7 +1005,7 @@ function doDeflect(b, perfect) {
   b.x += b.vx * 0.02; b.y += b.vy * 0.02;
 
   addCombo(perfect ? 3 : 1);
-  P.od = clamp(P.od + (perfect ? 13 : 5) * P.odGain, 0, 100);
+  gainOD(perfect ? 13 : 5);
 
   if (perfect) {
     G.perfects++;
@@ -997,8 +1047,13 @@ function spawnEnemy(type, x, y) {
     flash: 0, rot: rand(0, TAU), state: 0, stateT: 0, shieldHit: 0, score: t.score
   };
   if (type === 'boss') {
-    e.hp = e.max = (520 + G.wave * 108) * DIFF;
-    e.pattern = 0; e.patT = 2.0; e.tx = W / 2; e.ty = 220;
+    const grade = Math.min(10, Math.round(G.wave / 5));
+    const final = G.wave >= 50;
+    // 최종보스(50웨이브)는 같은 공식으로 계산한 체력의 3.4배로, 확실히 다른 급으로 만든다.
+    const hpMul = final ? 3.4 : 1;
+    e.hp = e.max = (520 + G.wave * 108) * DIFF * hpMul;
+    e.grade = grade; e.final = final; e.phase = 0; e.lastPattern = '';
+    e.pattern = ''; e.patT = 1.4; e.tx = W / 2; e.ty = 220;
   }
   if (type === 'spiral') { e.orbA = Math.atan2(y - H / 2, x - W / 2); e.orbR = rand(190, 270); e.sp = rand(0.35, 0.6) * (Math.random() < 0.5 ? 1 : -1); }
   enemies.push(e);
@@ -1013,7 +1068,7 @@ function damageEnemy(e, dmg, bx, by) {
 function killEnemy(e, bx, by) {
   e.dead = true; G.kills++;
   addCombo(1);
-  P.od = clamp(P.od + 3.2 * P.odGain, 0, 100);
+  gainOD(3.2);
   addScore(e.score, e.x, e.y - e.r - 8, '255,255,255');
   shards(e.x, e.y, e.type === 'boss' ? 46 : 10, e.col, e.type === 'boss' ? 460 : 300, e.r * 0.55);
   spark(e.x, e.y, e.type === 'boss' ? 60 : 14, e.glow, 420);
@@ -1035,8 +1090,8 @@ function killEnemy(e, bx, by) {
     }
   }
 }
-function eShoot(e, ang, spd, dmg, r) {
-  shoot(e.x + Math.cos(ang) * (e.r + 4), e.y + Math.sin(ang) * (e.r + 4), ang, spd, dmg || 1, 'e', 'red', r || 6.5);
+function eShoot(e, ang, spd, dmg, r, opt) {
+  shoot(e.x + Math.cos(ang) * (e.r + 4), e.y + Math.sin(ang) * (e.r + 4), ang, spd, dmg || 1, 'e', 'red', r || 6.5, opt);
 }
 
 function updateEnemy(e, dt) {
@@ -1151,11 +1206,11 @@ function updateEnemy(e, dt) {
         damageEnemy(e, (per ? 46 : 16) * P.deflectMul * dmgMult(), e.x, e.y);
         ring(P.x + Math.cos(a) * P.sr, P.y + Math.sin(a) * P.sr, 4, per ? 70 : 40, per ? '255,205,90' : '150,255,150', 0.3, 3);
         if (per) {
-          addCombo(2); P.od = clamp(P.od + 8 * P.odGain, 0, 100);
+          addCombo(2); gainOD(8);
           if (G.perfFxCD <= 0) { G.perfFxCD = 0.18; flash(0.2, '255,215,120'); shake(9); slowmo(0.2, 0.1 * P.slowLen); SFX.perfect(); }
           else { shake(4); SFX.deflect(); }
         }
-        else { addCombo(1); P.od = clamp(P.od + 3 * P.odGain, 0, 100); shake(4); SFX.deflect(); }
+        else { addCombo(1); gainOD(3); shake(4); SFX.deflect(); }
         return;
       }
     }
@@ -1165,6 +1220,19 @@ function updateEnemy(e, dt) {
   if (cd < e.r + P.r) hurtPlayer(1, e.x, e.y);
 }
 
+// 보스 등급(5웨이브당 1등급, 최대 10등급)별로 열리는 공격 패턴 목록.
+// 등급이 오를수록 새 패턴이 풀에 섞여 들어가고, 7등급부터는 일반 소환이
+// 강화 소환(거너·차저)으로 바뀐다. 최종보스(50웨이브)에는 전용 패턴이 하나 더 붙는다.
+function bossPool(grade, final) {
+  const p = ['radial', 'aim'];
+  if (grade >= 2) p.push('spin');
+  if (grade >= 3) p.push(grade >= 7 ? 'rsummon' : 'summon');
+  if (grade >= 4) p.push('spiral2');
+  if (grade >= 5) p.push('homing');
+  if (grade >= 6) p.push('cross');
+  if (final) p.push('finale');
+  return p;
+}
 function updateBoss(e, dt, ax, ay, d) {
   e.rot += dt * 0.5;
   if (Math.hypot(e.x - e.tx, e.y - e.ty) < 40) { e.tx = rand(220, W - 220); e.ty = rand(150, H - 260); }
@@ -1172,40 +1240,82 @@ function updateBoss(e, dt, ax, ay, d) {
   e.vy = lerp(e.vy, (e.ty - e.y) * 0.55, 1.6 * dt);
   e.patT -= dt;
   const hpr = e.hp / e.max;
-  const rage = hpr < 0.45 ? 1.45 : 1;
+  // 최종보스는 60%/30% 두 단계로 격화되고, 일반 보스는 45%에서 한 번만 격화된다.
+  let rage = 1;
+  if (e.final) {
+    if (hpr < 0.3) { rage = 1.9; e.phase = 2; }
+    else if (hpr < 0.6) { rage = 1.45; e.phase = 1; }
+  } else if (hpr < 0.45) rage = 1.45;
 
   if (e.burst > 0) {
     e.burstT -= dt;
     if (e.burstT <= 0) {
       e.burstT = e.burstGap; e.burst--;
-      if (e.pattern === 1) {
-        const a = Math.atan2(P.y - e.y, P.x - e.x);
-        for (let i = -1; i <= 1; i++) eShoot(e, a + i * 0.17, 330 * rage, 1, 7);
-      } else if (e.pattern === 2) {
-        e.spinA = (e.spinA || 0) + 0.42;
-        for (let i = 0; i < 4; i++) eShoot(e, e.spinA + i * (TAU / 4), 240 * rage, 1, 6.5);
-      }
-      shake(2);
+      bossBurstStep(e, rage);
+      shake(e.pattern === 'finale' ? 5 : 2);
     }
     return;
   }
   if (e.patT <= 0) {
-    e.pattern = (e.pattern + 1) % 4;
-    e.patT = 2.7 / rage / DIFF;
-    if (e.pattern === 0) { // radial
-      const n = Math.max(8, Math.round(26 * DIFF));
-      const off = rand(0, TAU);
-      for (let i = 0; i < n; i++) eShoot(e, off + i * TAU / n, 215 * rage, 1, 7);
-      ring(e.x, e.y, e.r, e.r + 130, e.col, 0.4, 4); shake(8);
-    } else if (e.pattern === 1) { e.burst = Math.max(1, Math.round(3 * DIFF)); e.burstT = 0; e.burstGap = 0.24 / DIFF; }
-    else if (e.pattern === 2) { e.burst = Math.max(3, Math.round(12 * DIFF)); e.burstT = 0; e.burstGap = 0.11 / DIFF; }
-    else {
-      for (let i = 0; i < 3; i++) {
-        const a = rand(0, TAU);
-        queueSpawn('drone', e.x + Math.cos(a) * 90, e.y + Math.sin(a) * 90, 0.3);
-      }
-      addText(e.x, e.y - e.r - 24, 'SUMMON', '255,150,150', 18, 0.9);
-    }
+    const pool = bossPool(e.grade, e.final);
+    const choices = pool.length > 1 ? pool.filter(p => p !== e.lastPattern) : pool;
+    e.pattern = pick(choices);
+    e.lastPattern = e.pattern;
+    e.patT = (e.final ? 2.1 : 2.6) / rage / DIFF;
+    bossStartPattern(e, rage);
+  }
+}
+function bossStartPattern(e, rage) {
+  const g = e.grade;
+  if (e.pattern === 'radial') {
+    const n = Math.max(8, Math.round((22 + g * 3) * DIFF));
+    const off = rand(0, TAU);
+    for (let i = 0; i < n; i++) eShoot(e, off + i * TAU / n, 215 * rage, 1, 7);
+    ring(e.x, e.y, e.r, e.r + 130, e.col, 0.4, 4); shake(8);
+  } else if (e.pattern === 'aim') {
+    e.burst = Math.max(1, Math.round((2 + Math.min(4, Math.floor(g / 2))) * DIFF)); e.burstT = 0; e.burstGap = 0.22 / DIFF;
+  } else if (e.pattern === 'spin') {
+    e.burst = Math.max(3, Math.round((10 + g) * DIFF)); e.burstT = 0; e.burstGap = 0.11 / DIFF;
+  } else if (e.pattern === 'summon') {
+    const n = Math.min(6, 2 + Math.floor(g / 2));
+    for (let i = 0; i < n; i++) { const a = rand(0, TAU); queueSpawn('drone', e.x + Math.cos(a) * 90, e.y + Math.sin(a) * 90, 0.3); }
+    addText(e.x, e.y - e.r - 24, 'SUMMON', '255,150,150', 18, 0.9);
+  } else if (e.pattern === 'rsummon') {
+    const n = Math.min(4, 1 + Math.floor(g / 3)), pool2 = ['gunner', 'charger'];
+    for (let i = 0; i < n; i++) { const a = rand(0, TAU); queueSpawn(pick(pool2), e.x + Math.cos(a) * 100, e.y + Math.sin(a) * 100, 0.5); }
+    addText(e.x, e.y - e.r - 24, 'REINFORCE', '255,150,150', 18, 0.9);
+  } else if (e.pattern === 'spiral2') {
+    e.burst = Math.max(6, Math.round(11 * DIFF)); e.burstT = 0; e.burstGap = 0.09 / DIFF; e.spin2A = e.spin2A || 0;
+  } else if (e.pattern === 'homing') {
+    e.burst = 3; e.burstT = 0; e.burstGap = 0.32 / DIFF;
+  } else if (e.pattern === 'cross') {
+    e.burst = 4; e.burstT = 0; e.burstGap = 0.20 / DIFF;
+  } else if (e.pattern === 'finale') {
+    e.burst = 3; e.burstT = 0; e.burstGap = 0.34 / DIFF;
+  }
+}
+function bossBurstStep(e, rage) {
+  if (e.pattern === 'aim') {
+    const a = Math.atan2(P.y - e.y, P.x - e.x);
+    for (let i = -1; i <= 1; i++) eShoot(e, a + i * 0.17, 330 * rage, 1, 7);
+  } else if (e.pattern === 'spin') {
+    e.spinA = (e.spinA || 0) + 0.42;
+    for (let i = 0; i < 4; i++) eShoot(e, e.spinA + i * (TAU / 4), 240 * rage, 1, 6.5);
+  } else if (e.pattern === 'spiral2') {
+    e.spin2A += 0.5;
+    eShoot(e, e.spin2A, 200 * rage, 1, 6.5);
+    eShoot(e, -e.spin2A + Math.PI, 200 * rage, 1, 6.5);
+  } else if (e.pattern === 'homing') {
+    const a = Math.atan2(P.y - e.y, P.x - e.x) + rand(-0.5, 0.5);
+    eShoot(e, a, 150 * rage, 1, 7.5, { homing: 2.3, life: 5 });
+  } else if (e.pattern === 'cross') {
+    const base = Math.atan2(P.y - e.y, P.x - e.x);
+    for (let i = 0; i < 4; i++) eShoot(e, base + i * (TAU / 4), 260 * rage, 1, 7);
+  } else if (e.pattern === 'finale') {
+    const off = e.burst % 2 === 0 ? 0 : Math.PI / 14;
+    const n = Math.max(10, Math.round(20 * DIFF));
+    for (let i = 0; i < n; i++) eShoot(e, off + i * TAU / n, 230 * rage, 1, 7);
+    ring(e.x, e.y, e.r, e.r + 150, '255,205,90', 0.4, 5); shake(10);
   }
 }
 
@@ -1228,10 +1338,15 @@ function startWave(n) {
   if (P.odT > 0) A.intensity = 3;
 
   if (n % 5 === 0) {
-    G.banner = 'BOSS'; G.bannerT = 2.2;
+    const final = n >= 50;
+    G.banner = final ? 'FINAL BOSS' : 'BOSS'; G.bannerT = final ? 3.0 : 2.2;
     queueSpawn('boss', W / 2, 170, 1.3);
     const adds = Math.max(1, Math.round((3 + Math.floor(n / 5)) * DIFF));
     for (let i = 0; i < adds; i++) { const p = edgePoint(); queueSpawn('drone', p.x, p.y, rand(1.4, 2.2)); }
+    if (final) {
+      const pool2 = ['gunner', 'charger'];
+      for (let i = 0; i < 4; i++) { const p = edgePoint(); queueSpawn(pick(pool2), p.x, p.y, rand(1.8, 3.0)); }
+    }
     SFX.boss();
     return;
   }
@@ -1364,7 +1479,7 @@ function applyMode() {
   if (document.body && document.body.classList) { document.body.classList.toggle('iphone', iph); document.body.classList.toggle('mobile', mob); }
   layoutTouch(iph);
   resize();
-  $('devLabel').textContent = iph ? '아이폰' : '기타';
+  $('devLabel').textContent = DEV_LABELS[OPT.dev] || '기타';
   ovDev.classList.remove('on');
   ovMode.classList.toggle('on', MODE === null);
   ovTitle.classList.toggle('on', MODE !== null && (G.state === 'title' || devBack === 'mode'));
@@ -1406,9 +1521,7 @@ function buildDiffCards() {
     el.onclick = () => {
       DIFF = d.v; OPT.diff = d.v; savePrefs();
       ovDiff.classList.remove('on');
-      const proceed = () => { if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun(); };
-      if (d.id === 'hard' && !OPT.nick) openNick(proceed, () => { openDiff(); });
-      else proceed();
+      if (MODE === 'mobile' && !OPT.tutDone) openTutorial('start'); else startRun();
     };
     row.appendChild(el);
   });
@@ -1460,7 +1573,8 @@ $('btnRankOpenPause').onclick = () => { ovPause.classList.remove('on'); openRank
 // ---------- nickname overlay ----------
 let nickOnOk = null, nickOnCancel = null;
 function openNick(onOk, onCancel) {
-  nickOnOk = onOk || null; nickOnCancel = onCancel || onOk || null;
+  nickOnOk = onOk || null; nickOnCancel = onCancel || null;
+  $('btnNickCancel').style.display = onCancel ? '' : 'none';
   $('nickInput').value = OPT.nick || '';
   ovNick.classList.add('on');
   setTimeout(() => $('nickInput').focus(), 30);
@@ -1505,8 +1619,8 @@ function openDev(mode) {
     $('devTitle').textContent = '기기 선택';
     $('devMsg').textContent = '사용 중인 기기를 골라주세요.';
     row.appendChild(devBtn('아이폰', () => setDev('iphone')));
-    row.appendChild(devBtn('아이패드', () => setDev('other')));
-    row.appendChild(devBtn('안드로이드', () => setDev('other')));
+    row.appendChild(devBtn('아이패드', () => setDev('ipad')));
+    row.appendChild(devBtn('안드로이드', () => setDev('android')));
     row.appendChild(devBtn('기타', () => setDev('other')));
   }
   ovDev.classList.add('on');
@@ -1603,6 +1717,9 @@ function requestFS() {
 
 document.getElementById('btnStart').onclick = () => {
   audioInit(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume(); requestFS();
+  // 난이도와 무관하게, 닉네임이 없으면 여기서 무조건 물어본다.
+  if (!OPT.nick) { openNick(() => { logVisit(); openDiff(); }); return; }
+  logVisit();
   openDiff();
 };
 document.getElementById('btnRetry').onclick = () => { requestFS(); startRun(); };
@@ -1637,13 +1754,7 @@ function startRun() {
   $('tutMark').className = ''; resetTouch();
   A.intensity = 1; applyVolumes();
 }
-function gameOver() {
-  G.state = 'over';
-  shake(30); flash(0.8, '255,80,110');
-  shards(P.x, P.y, 40, '120,230,255', 460, 9);
-  ring(P.x, P.y, 6, 360, '120,230,255', 1.0, 6);
-  SFX.over();
-  A.intensity = 1;
+function fillEndStats() {
   if (G.score > G.best) { G.best = G.score; saveBest(); }
   document.getElementById('oScore').textContent = G.score.toLocaleString();
   document.getElementById('oWave').textContent = G.wave;
@@ -1654,7 +1765,32 @@ function gameOver() {
   document.getElementById('bestTitle').textContent = G.best.toLocaleString();
   $('oDiff').textContent = diffName();
   if (diffIsHard() && OPT.nick) submitScore(OPT.nick, G.score, G.wave);
+}
+function gameOver() {
+  G.state = 'over';
+  $('oEyebrow').textContent = 'Core Breach';
+  $('oHd').textContent = '격추됨'; $('oHd').classList.remove('good'); $('oHd').classList.add('bad');
+  shake(30); flash(0.8, '255,80,110');
+  shards(P.x, P.y, 40, '120,230,255', 460, 9);
+  ring(P.x, P.y, 6, 360, '120,230,255', 1.0, 6);
+  SFX.over();
+  A.intensity = 1;
+  fillEndStats();
   setTimeout(() => { if (G.state === 'over') ovOver.classList.add('on'); }, 850);
+}
+// 50웨이브 최종보스를 잡으면 호출된다. 게임오버 화면을 재사용하되
+// 문구·색·연출만 승리용으로 바꾼다.
+function gameClear() {
+  G.state = 'over';
+  $('oEyebrow').textContent = 'Mission Complete';
+  $('oHd').textContent = '클리어'; $('oHd').classList.remove('bad'); $('oHd').classList.add('good');
+  shake(20); flash(0.9, '255,205,90');
+  shards(P.x, P.y, 50, '255,205,90', 500, 10);
+  ring(P.x, P.y, 8, 420, '255,205,90', 1.2, 7);
+  SFX.clear();
+  A.intensity = 1;
+  fillEndStats();
+  setTimeout(() => { if (G.state === 'over') ovOver.classList.add('on'); }, 950);
 }
 
 // ---------- update ----------
@@ -1707,6 +1843,14 @@ function update(dt) {
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
     b.px = b.x; b.py = b.y;
+    if (b.homing > 0 && b.team === 'e') {
+      // 목표 방향으로 초당 b.homing 라디안만큼만 서서히 꺾는다(급격한 방향전환 방지)
+      const want = Math.atan2(P.y - b.y, P.x - b.x);
+      const cur = Math.atan2(b.vy, b.vx);
+      const speed = len(b.vx, b.vy);
+      const na = cur + clamp(angDiff(want, cur), -b.homing * dt, b.homing * dt);
+      b.vx = Math.cos(na) * speed; b.vy = Math.sin(na) * speed;
+    }
     b.x += b.vx * dt; b.y += b.vy * dt;
     b.life -= dt;
     if (b.life <= 0 || b.x < -50 || b.x > W + 50 || b.y < -50 || b.y > H + 50) { bullets.splice(i, 1); continue; }
@@ -1749,7 +1893,7 @@ function update(dt) {
 
   // wave flow
   if (G.phase === 'fight') {
-    if (enemies.length === 0 && spawns.length === 0) waveClear();
+    if (enemies.length === 0 && spawns.length === 0) { if (G.wave >= 50) gameClear(); else waveClear(); }
   } else {
     G.breakT -= dt;
     if (G.breakT <= 0) {
@@ -1982,12 +2126,20 @@ function ringGauge(x, y, r, prog, col, wid) {
     ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(prog, 0, 1)); ctx.stroke();
   }
 }
-function padBtn(c, label, prog, col, ready) {
+function padBtn(c, label, prog, col, ready, stick) {
   ctx.fillStyle = 'rgba(11,20,34,.82)';
   ctx.beginPath(); ctx.arc(c.x, c.y, BTN_R, 0, TAU); ctx.fill();
   ctx.strokeStyle = ready ? col : 'rgba(120,170,210,.35)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(c.x, c.y, BTN_R, 0, TAU); ctx.stroke();
   ringGauge(c.x, c.y, BTN_R + 7, prog, col, 5);
+  // 버튼을 누른 채 밀고 있으면(=탭 대신 방향 입력 중) 그 방향을 화살표로 보여준다.
+  if (stick && stick.on && stick.dist >= BTN_DEAD) {
+    const kr = Math.min(stick.dist, BTN_R * 1.6);
+    ctx.strokeStyle = col; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + stick.dx * kr, c.y + stick.dy * kr); ctx.stroke();
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(c.x + stick.dx * kr, c.y + stick.dy * kr, 9, 0, TAU); ctx.fill();
+  }
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = '800 ' + hf(13) + 'px "Pretendard","Malgun Gothic",sans-serif';
   ctx.fillStyle = ready ? col : 'rgba(140,175,205,.5)';
@@ -2050,9 +2202,26 @@ function drawTouchUI() {
   // ---- ultimate button ----
   const full = P.od >= 100 && P.odT <= 0, act = P.odT > 0;
   if (full) {
+    const pulse = .40 + Math.sin(G.t * 9) * .26;
     ctx.globalCompositeOperation = 'lighter';
-    glow('gold', ULT_C.x, ULT_C.y, 78, .28 + Math.sin(G.t * 8) * .14);
+    glow('gold', ULT_C.x, ULT_C.y, 100, pulse);
     ctx.globalCompositeOperation = 'source-over';
+    // 버튼 주위를 도는 발광 눈금 - 다 찼다는 게 확실히 티 나도록 강조
+    ctx.strokeStyle = 'rgba(255,214,120,' + (0.55 + Math.sin(G.t * 9) * .35) + ')';
+    ctx.lineWidth = 3;
+    const ticks = 10, spin = G.t * 1.6;
+    for (let i = 0; i < ticks; i++) {
+      const a = spin + i * TAU / ticks;
+      const r0 = ULT_R + 14, r1 = ULT_R + 22;
+      ctx.beginPath();
+      ctx.moveTo(ULT_C.x + Math.cos(a) * r0, ULT_C.y + Math.sin(a) * r0);
+      ctx.lineTo(ULT_C.x + Math.cos(a) * r1, ULT_C.y + Math.sin(a) * r1);
+      ctx.stroke();
+    }
+    if (Math.random() < 0.10) {
+      const a = rand(0, TAU);
+      spark(ULT_C.x + Math.cos(a) * (ULT_R + 6), ULT_C.y + Math.sin(a) * (ULT_R + 6), 1, 'gold', 70, { ang: a, spread: 0.5 });
+    }
   }
   ctx.fillStyle = 'rgba(11,20,34,.85)';
   ctx.beginPath(); ctx.arc(ULT_C.x, ULT_C.y, ULT_R, 0, TAU); ctx.fill();
@@ -2067,11 +2236,11 @@ function drawTouchUI() {
   // ---- optional split buttons ----
   if (showBarBtn()) {
     const sr = clamp(1 - P.shieldCD / (P.shieldCDMax + P.shieldDur), 0, 1);
-    padBtn(BAR_C, '배리어', sr, '#ffd469', sr >= 1);
+    padBtn(BAR_C, '배리어', sr, '#ffd469', sr >= 1, BS.bar);
   }
   if (showDashBtn()) {
     const dr = clamp(1 - P.dashCD / P.dashCDMax, 0, 1);
-    padBtn(DASH_C, '대시', dr, '#b49bff', dr >= 1);
+    padBtn(DASH_C, '대시', dr, '#b49bff', dr >= 1, BS.dash);
   }
   ctx.restore();
 }
